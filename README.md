@@ -13,9 +13,9 @@ This repository documents my self-hosted home server running on Ubuntu Server wi
   - Clear separation of services
 
 ## Stacks
-- Media Stack
-- Nextcloud Stack
-- Immich Stack
-- Security & Maintenance Stack
+- [Media Stack](https://github.com/Markaz-Ash-Shadibi/Salmans-Homelab/tree/main/media-stack)
+- [Nextcloud Stack](https://github.com/Markaz-Ash-Shadibi/Salmans-Homelab/tree/main/nextcloud-stack)
+- [Immich Stack](https://github.com/Markaz-Ash-Shadibi/Salmans-Homelab/tree/main/immich-stack)
+- [Security & Maintenance Stack](https://github.com/Markaz-Ash-Shadibi/Salmans-Homelab/tree/main/security-stack)
 
 Each stack has its own folder containing Docker Compose configuration and documentation.
