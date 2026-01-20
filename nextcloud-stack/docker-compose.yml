@@ -1,0 +1,26 @@
+services:
+  db:
+    image: mariadb:11
+    container_name: nextcloud-db
+    environment:
+      MYSQL_ROOT_PASSWORD: SalmanOmar2011
+      MYSQL_DATABASE: nextcloud
+      MYSQL_USER: nextcloud
+      MYSQL_PASSWORD: SalmanOmar2011
+    volumes:
+      - /mnt/storage/nextcloud/db:/var/lib/mysql
+
+  app:
+    image: nextcloud:latest
+    container_name: nextcloud-app
+    ports:
+      - 8081:80
+    environment:
+      MYSQL_PASSWORD: SalmanOmar2011
+      MYSQL_DATABASE: nextcloud
+      MYSQL_USER: nextcloud
+      MYSQL_HOST: db
+    volumes:
+      - /mnt/storage/nextcloud/data:/var/www/html
+    depends_on:
+      - db
