@@ -1,0 +1,39 @@
+services:
+  database:
+    image: tensorchord/pgvecto-rs:pg15-v0.2.0
+    container_name: immich-db
+    environment:
+      POSTGRES_USER: immich
+      POSTGRES_PASSWORD: SalmanOmar2011
+      POSTGRES_DB: immich
+    volumes:
+      - /mnt/storage/immich/postgres-data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+  redis:
+    image: redis:7
+    container_name: immich-redis
+    restart: unless-stopped
+
+  immich:
+    image: ghcr.io/immich-app/immich-server:release
+    container_name: immich-app
+    ports:
+      - "2283:2283"
+    environment:
+      DB_HOSTNAME: database
+      DB_USERNAME: immich
+      DB_PASSWORD: SalmanOmar2011
+      DB_DATABASE_NAME: immich
+
+      REDIS_HOSTNAME: redis
+
+      JWT_SECRET: change_this_to_a_long_random_string
+      NODE_ENV: production
+      UPLOAD_LOCATION: /usr/src/app/upload
+    volumes:
+      - /mnt/storage/immich/upload:/usr/src/app/upload
+    depends_on:
+      - database
+      - redis
+    restart: unless-stopped
