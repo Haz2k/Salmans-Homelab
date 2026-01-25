@@ -1,4 +1,4 @@
-# File Browser
+# Utility Stack
 
 Handles self-hosted file management with a web interface.
 
