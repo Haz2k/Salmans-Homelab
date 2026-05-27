@@ -1,28 +1,32 @@
-# Salman’s HomeLab
+# Salman’s HomeLab Configuration
 
-This repository documents my self-hosted home server infrastructure running on **Proxmox VE (PVE)** using LXC containers, Docker Compose, and Portainer.
+This repository documents my multi-node self-hosted home server infrastructure running on **Proxmox VE (PVE)**.
 
-## System Overview
+---
 
-* **Host Machine:** Dell Optiplex 5080
-* **Hypervisor:** Proxmox VE 8.x (Host IP: `192.168.0.100`)
-* **Container Management:** LXC Containers + Docker Compose + Portainer (`192.168.0.128:9000`)
-* **Base Domain:** `salmanslab.duckdns.org` (SSL via Nginx Proxy Manager)
-* **Storage:** * 256GB NVMe (OS, LXC root disks, high-performance databases)
-  * 1TB HDD mounted at `/mnt/pve/storage` (Persistent app data and media)
-* **Design Goals:**
-  * High availability and resource isolation via LXC
-  * Easy containerized updates using Portainer / Watchtower
-  * Complete separation of routing, media, storage, and automation stacks
+## 🖥️ Node Hardware Layout
 
-## Stacks & LXC Layout
+### 🟠 [pve1](./pve1) — Dell Optiplex 5080 (Primary Node)
+* **Host IP:** `192.168.0.100`
+* **Storage:** 256GB NVMe (OS & DBs) + 1TB HDD mapped to `/mnt/pve/storage`
+* **Core Role:** Handles edge routing, media management, local cloud, and document automation.
+* **Services Hosted:** NPM, Immich, Nextcloud, Home Assistant, Jellyfin/Arr Stack, Pi-hole v6, Paperless-NGX/n8n.
 
-* **[Utility & Routing]** (CT100 — `192.168.0.128`): Nginx Proxy Manager, Homepage Dashboard, Filebrowser, DuckDNS Updater
-* **[Immich Stack](https://github.com/Markaz-Ash-Shadibi/Salmans-Homelab/tree/main/immich-stack)** (CT101 — `192.168.0.129`): Photos, PostgreSQL, Redis
-* **[Nextcloud Stack](https://github.com/Markaz-Ash-Shadibi/Salmans-Homelab/tree/main/nextcloud-stack)** (CT102 — `192.168.0.132`): Cloud storage, MariaDB
-* **[Home Assistant Stack]** (CT103 — `192.168.0.133`): Smart home automation
-* **[Media Stack](https://github.com/Markaz-Ash-Shadibi/Salmans-Homelab/tree/main/media-stack)** (CT104 — `192.168.0.134`): Jellyfin, Arr apps, qBittorrent, Gluetun VPN
-* **[Security & Maintenance Stack](https://github.com/Markaz-Ash-Shadibi/Salmans-Homelab/tree/main/security-stack)** (CT105 — `192.168.0.136`): Pi-hole v6 (Local overrides for subdomains)
-* **[Automation Stack]** (CT106 — `192.168.0.137`): Paperless-NGX, Ollama (Mistral), n8n workflow
+### 🔵 pve2 — (Secondary Node)
+* *Documentation coming soon...*
+
+---
+
+## 📦 Stacks & LXC Layout (pve1)
+
+All services for this node are organized cleanly inside the `pve1/` directory:
+
+* **[Utility & Routing Layout](./pve1/utility-stack)** (CT100 — `192.168.0.128`): Nginx Proxy Manager, Homepage Dashboard, Filebrowser, DuckDNS Updater
+* **[Immich Stack](./pve1/immich-stack)** (CT101 — `192.168.0.129`): Photos, PostgreSQL, Redis
+* **[Nextcloud Stack](./pve1/nextcloud-stack)** (CT102 — `192.168.0.132`): Cloud storage, MariaDB
+* **[Home Assistant Stack](./pve1/home-assistant-stack)** (CT103 — `192.168.0.133`): Smart home automation
+* **[Media Stack](./pve1/media-stack)** (CT104 — `192.168.0.134`): Jellyfin, Arr apps, qBittorrent, Gluetun VPN
+* **[Security & Maintenance Stack](./pve1/security-stack)** (CT105 — `192.168.0.136`): Pi-hole v6 (Local overrides for subdomains)
+* **[Automation Stack](./pve1/automation-stack)** (CT106 — `192.168.0.137`): Paperless-NGX, Ollama (Mistral), n8n workflow
 
 *Each stack folder contains its respective Docker Compose configurations and specific system documentation.*
