@@ -1,13 +1,15 @@
 # Nextcloud Stack
 
-Provides private cloud storage and file synchronization.
+Provides private cloud storage, file synchronization, and collaborative tools running inside LXC container **CT102** (`192.168.0.132`).
 
 ## Services
-- Nextcloud
-- Database (MariaDB or PostgreSQL)
+
+* **Nextcloud Hub:** Core web interface, application suite, and file synchronization engine.
+* **MariaDB:** Relational database backend optimized for Nextcloud data structures and user indexing.
 
 ## Notes
-- Used as a self-hosted alternative to OneDrive
-- User data stored on a separate storage drive
-- Supports desktop and mobile sync clients
-- Managed via Portainer
+
+* Used as a secure, self-hosted alternative to OneDrive, Google Drive, and Dropbox.
+* User data directories are mapped back to persistent directories on the host's 1TB storage drive.
+* Full support for mobile applications, desktop sync clients, and WebDAV access layers.
+* Managed entirely via Portainer.
