@@ -6,7 +6,7 @@ This repository documents my multi-node self-hosted home server infrastructure r
 
 ## 🖥️ Node Hardware Layout
 
-### 🟠 [pve1](./pve-1) — Dell Optiplex 5080 (Primary Node)
+### 🟠 [pve1](./Pve-1) — Dell Optiplex 5080 (Primary Node)
 * **Host IP:** `192.168.0.100`
 * **Storage:** 256GB NVMe (OS & DBs) + 1TB HDD mapped to `/mnt/pve/storage`
 * **Core Role:** Handles edge routing, media management, local cloud, and document automation.
