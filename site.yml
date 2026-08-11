@@ -1,0 +1,86 @@
+---
+# Master playbook. Run the whole thing, or scope with --tags.
+#
+#   ansible-playbook site.yml --tags init      # bootstrap an empty environment
+#   ansible-playbook site.yml --tags upgrade    # patch everything (OS + containers)
+#   ansible-playbook site.yml --tags media_stack  # rebuild just one stack
+#
+# All runs need: --vault-password-file /path/to/.vault_pass (kept on the
+# flash drive, never in this repo).
+
+- name: Harden and baseline every Proxmox node + the Pi
+  hosts: proxmox_nodes:qdevice
+  become: true
+  tags: [init, security_baseline]
+  roles:
+    - security_baseline
+
+- name: Provision LXC containers on the Proxmox nodes
+  hosts: proxmox_nodes
+  become: true
+  tags: [init, provision]
+  roles:
+    - proxmox_lxc_provision
+
+- name: Install Docker on the app-hosting LXCs
+  hosts: proxmox_nodes
+  become: true
+  tags: [init, docker]
+  roles:
+    - docker
+
+- name: Deploy Pi-hole (standalone, not in a Docker stack)
+  hosts: proxmox_nodes
+  become: true
+  tags: [pihole]
+  roles:
+    - pihole
+
+- name: Deploy Traefik (reverse proxy)
+  hosts: proxmox_nodes
+  become: true
+  tags: [core_stack, traefik]
+  roles:
+    - traefik
+
+- name: Deploy core stack (Authelia, Vaultwarden, DuckDNS)
+  hosts: proxmox_nodes
+  become: true
+  tags: [core_stack]
+  roles:
+    - core_stack
+
+- name: Deploy media stack (Jellyfin, *arr, qBittorrent, Gluetun)
+  hosts: proxmox_nodes
+  become: true
+  tags: [media_stack]
+  roles:
+    - media_stack
+
+- name: Deploy monitoring stack (Prometheus, Grafana, Scrutiny, Uptime Kuma)
+  hosts: proxmox_nodes
+  become: true
+  tags: [monitoring_stack]
+  roles:
+    - monitoring_stack
+
+- name: Deploy automation stack (Home Assistant, Ollama, Paperless-NGX)
+  hosts: proxmox_nodes
+  become: true
+  tags: [automation_stack]
+  roles:
+    - automation_stack
+
+- name: Configure ZFS replication + email alerts
+  hosts: proxmox_nodes
+  become: true
+  tags: [zfs, monitoring_stack]
+  roles:
+    - zfs_alerts
+
+- name: Deploy Semaphore (safe automated updates)
+  hosts: proxmox_nodes
+  become: true
+  tags: [init, semaphore]
+  roles:
+    - semaphore

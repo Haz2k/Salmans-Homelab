@@ -1,0 +1,31 @@
+---
+# proxmox_lxc_provision
+#
+# Creates one LXC per entry in group_vars/all.yml -> lxc_services, using
+# the official community.general.proxmox module (see requirements.yml
+# for the collection). Docs:
+# https://docs.ansible.com/ansible/latest/collections/community/general/proxmox_module.html
+
+- name: Create LXC containers for each service stack
+  community.general.proxmox:
+    api_user: "{{ vault_proxmox_api_user }}"
+    api_token_id: "{{ vault_proxmox_api_token_id }}"
+    api_token_secret: "{{ vault_proxmox_api_token_secret }}"
+    api_host: "{{ vault_proxmox_api_host }}"
+    node: "{{ item.value.node }}"
+    vmid: "{{ item.value.ctid }}"
+    hostname: "{{ item.key }}"
+    ostemplate: "local:vztmpl/debian-12-standard_12.7-1_amd64.tar.zst"  # TODO: confirm template name on your node
+    cores: "{{ item.value.cores }}"
+    memory: "{{ item.value.memory }}"
+    net:
+      net0: "name=eth0,bridge=vmbr0,ip={{ item.value.ip }}/24,gw=192.168.1.1"
+    unprivileged: true
+    state: present
+  loop: "{{ lxc_services | dict2items }}"
+  loop_control:
+    label: "{{ item.key }}"
+
+# NOTE: API token vars (vault_proxmox_api_*) live in group_vars/all/vault.yml,
+# encrypted with Ansible Vault. Create the token in Proxmox first:
+# Datacenter -> Permissions -> API Tokens, scoped to what Ansible needs.

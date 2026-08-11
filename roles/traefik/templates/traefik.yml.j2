@@ -1,0 +1,23 @@
+# TODO: replace with real static config from Traefik's official docs:
+# https://doc.traefik.io/traefik/reference/static-configuration/file/
+# Placeholder only.
+entryPoints:
+  web:
+    address: ":80"
+  websecure:
+    address: ":443"
+
+providers:
+  docker:
+    exposedByDefault: false
+  file:
+    directory: /etc/traefik/dynamic
+    watch: true
+
+certificatesResolvers:
+  letsencrypt:
+    acme:
+      email: "TODO@example.com"
+      storage: /acme.json
+      httpChallenge:
+        entryPoint: web

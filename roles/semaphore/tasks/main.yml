@@ -1,0 +1,29 @@
+---
+# semaphore — safe automated updates (backup -> update -> healthcheck ->
+# autorevert), plus Diun for update notifications.
+#
+# Sourcing:
+#   Semaphore: https://docs.semaphoreui.com/administration-guide/installation/
+#              (Docker Compose section)
+#   Diun:      https://crazymax.dev/diun/install/docker/
+
+- name: Create ansible_control directory
+  ansible.builtin.file:
+    path: /opt/ansible_control
+    state: directory
+    mode: "0755"
+
+- name: Template docker-compose.yml
+  ansible.builtin.template:
+    src: docker-compose.yml.j2
+    dest: /opt/ansible_control/docker-compose.yml
+    mode: "0644"
+
+- name: Start semaphore + diun
+  community.docker.docker_compose_v2:
+    project_src: /opt/ansible_control
+    state: present
+
+# TODO: write the actual update_service.yml playbook this role's
+# Semaphore instance will call — backup -> update -> healthcheck ->
+# autorevert, parameterized by stack tag, triggered by Diun webhook.

@@ -1,32 +1,71 @@
-# Salman’s HomeLab Configuration
+# Salman's Homelab — Ansible Control Repo
 
-This repository documents my multi-node self-hosted home server infrastructure running on **Proxmox VE (PVE)**.
+This repo is the single source of truth for the homelab. If a node dies,
+cloning this repo + running `site.yml` (with the vault password from the
+flash drive) rebuilds it.
 
----
+Full write-up / hardware plan lives at:
+https://github.com/Haz2k/Salmans-Homelab
 
-## 🖥️ Node Hardware Layout
+## Current phase
 
-### 🟠 [pve1](./Pve-1) — Dell Optiplex 5080 (Primary Node)
-* **Host IP:** `192.168.0.100`
-* **Storage:** 256GB NVMe (OS & DBs) + 1TB HDD mapped to `/mnt/pve/storage`
-* **Core Role:** Handles edge routing, media management, local cloud, and document automation.
-* **Services Hosted:** NPM, Immich, Nextcloud, Home Assistant, Jellyfin/Arr Stack, Pi-hole v6, Paperless-NGX/n8n.
+Ansible setup across the 3 currently-owned devices only:
+- pve1 — Dell OptiPlex Micro 3050 (Proxmox node)
+- pve2 — Dell OptiPlex Micro 3050 (Proxmox node)
+- pi-qdevice — Raspberry Pi 3B (Corosync QDevice)
 
-### 🔵 pve2 — (Secondary Node)
-* *Documentation coming soon...*
+Everything else (rack build, PBS, 3rd node, AI PC) is deferred — see
+`docs/phases.md`.
 
----
+## How this repo is organized
 
-## 📦 Stacks & LXC Layout (pve1)
+```
+inventory/            # which machines exist (pve1, pve2, pi)
+group_vars/           # variables + Ansible Vault-encrypted secrets
+roles/                # one folder per job (security, docker, each stack...)
+playbooks/            # entry points that call roles
+site.yml              # the master playbook — runs everything, tag-gated
+requirements.yml      # Galaxy roles/collections this repo depends on
+```
 
-All services for this node are organized cleanly inside the `pve1/` directory:
+## First-time setup (on the control node / your machine)
 
-* **[Utility & Routing Layout](./pve1/utility-stack)** (CT100 — `192.168.0.101`): Nginx Proxy Manager, Homepage Dashboard, Filebrowser, DuckDNS Updater
-* **[Immich Stack](./pve1/immich-stack)** (CT101 — `192.168.0.102`): Photos, PostgreSQL, Redis
-* **[Nextcloud Stack](./pve1/nextcloud-stack)** (CT102 — `192.168.0.103`): Cloud storage, MariaDB
-* **[Home Assistant Stack](./pve1/home-assistant-stack)** (CT103 — `192.168.0.104`): Smart home automation
-* **[Media Stack](./pve1/media-stack)** (CT104 — `192.168.0.105`): Jellyfin, Arr apps, qBittorrent, Gluetun VPN
-* **[Security & Maintenance Stack](./pve1/security-stack)** (CT105 — `192.168.0.106`): Pi-hole v6 (Local overrides for subdomains)
-* **[Automation Stack](./pve1/automation-stack)** (CT106 — `192.168.0.107`): Paperless-NGX, Ollama (Mistral), n8n workflow
+```bash
+# install Galaxy roles + collections this repo needs
+ansible-galaxy install -r requirements.yml
+ansible-galaxy collection install -r requirements.yml
 
-*Each stack folder contains its respective Docker Compose configurations and specific system documentation.*
+# create your vault password file (NOT committed — lives on the flash drive)
+# then encrypt secrets:
+ansible-vault create group_vars/all/vault.yml
+```
+
+## Running it
+
+```bash
+# bootstrap everything from empty (new/replacement node)
+ansible-playbook site.yml --tags init --vault-password-file .vault_pass
+
+# patch everything (OS + containers)
+ansible-playbook site.yml --tags upgrade --vault-password-file .vault_pass
+
+# rebuild just one stack, e.g. media
+ansible-playbook site.yml --tags media_stack --vault-password-file .vault_pass
+```
+
+## Secrets model
+
+- All secrets live encrypted in `group_vars/all/vault.yml` via Ansible
+  Vault — safe to commit to GitHub.
+- The **vault password itself** is the one thing that never goes to
+  GitHub. It lives on a flash drive (`ansible-homelab/.vault_pass`)
+  alongside a mirror of this repo and a `node-configs/` folder with
+  native app exports (Pi-hole Teleporter, Uptime Kuma JSON, Grafana
+  dashboard JSON, Home Assistant backups) for fast manual recovery.
+
+## Role sourcing rule
+
+When a well-known, actively maintained Galaxy role exists for a job,
+use it (see `requirements.yml`) instead of writing one from scratch.
+For app-specific compose/config files, source from the app's official
+docs/website first, falling back to its official GitHub repo.

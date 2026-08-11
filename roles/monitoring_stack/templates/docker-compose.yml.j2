@@ -1,0 +1,37 @@
+# TODO: SKELETON only — replace with real config from each app's official
+# docs (see tasks/main.yml for links).
+services:
+  prometheus:
+    image: prom/prometheus
+    container_name: prometheus
+    restart: unless-stopped
+
+  grafana:
+    image: grafana/grafana
+    container_name: grafana
+    restart: unless-stopped
+
+  node_exporter:
+    image: prom/node-exporter
+    container_name: node_exporter
+    restart: unless-stopped
+
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor
+    container_name: cadvisor
+    restart: unless-stopped
+
+  scrutiny:
+    image: ghcr.io/analogj/scrutiny
+    container_name: scrutiny
+    restart: unless-stopped
+
+  uptime_kuma:
+    image: louislam/uptime-kuma
+    container_name: uptime_kuma
+    restart: unless-stopped
+
+  speedtest_tracker:
+    image: lscr.io/linuxserver/speedtest-tracker
+    container_name: speedtest_tracker
+    restart: unless-stopped

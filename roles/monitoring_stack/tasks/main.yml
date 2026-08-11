@@ -1,0 +1,31 @@
+---
+# monitoring_stack — Prometheus, Grafana, node_exporter, pve_exporter,
+# cadvisor, Scrutiny, Uptime Kuma, Speedtest Tracker.
+#
+# Sourcing:
+#   Prometheus:  https://prometheus.io/docs/prometheus/latest/installation/
+#   Grafana:     https://grafana.com/docs/grafana/latest/setup-grafana/installation/docker/
+#   node_exporter: https://github.com/prometheus/node_exporter
+#   pve_exporter:  https://github.com/prometheus-pve/prometheus-pve-exporter
+#   cadvisor:    https://github.com/google/cadvisor
+#   Scrutiny:    https://github.com/AnalogJ/scrutiny
+#   Uptime Kuma: https://github.com/louislam/uptime-kuma (Docker section
+#                in README)
+#   Speedtest Tracker: https://docs.speedtest-tracker.dev/getting-started/installation
+
+- name: Create monitoring_stack directory
+  ansible.builtin.file:
+    path: /opt/monitoring_stack
+    state: directory
+    mode: "0755"
+
+- name: Template docker-compose.yml
+  ansible.builtin.template:
+    src: docker-compose.yml.j2
+    dest: /opt/monitoring_stack/docker-compose.yml
+    mode: "0644"
+
+- name: Start monitoring_stack
+  community.docker.docker_compose_v2:
+    project_src: /opt/monitoring_stack
+    state: present

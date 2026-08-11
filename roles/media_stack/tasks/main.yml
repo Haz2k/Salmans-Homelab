@@ -1,0 +1,34 @@
+---
+# media_stack — Jellyfin, Sonarr, Radarr, Prowlarr, qBittorrent, Gluetun,
+# Jellyseerr, Maintainerr, all in one LXC via docker compose.
+#
+# Sourcing rule: pull each app's compose block from ITS OWN official docs
+# first, GitHub repo as fallback. Good starting points:
+#   Jellyfin:     https://jellyfin.org/docs/general/installation/container/
+#   Sonarr:       https://wiki.servarr.com/sonarr/installation/docker
+#   Radarr:       https://wiki.servarr.com/radarr/installation/docker
+#   Prowlarr:     https://wiki.servarr.com/prowlarr/installation/docker
+#   qBittorrent:  https://github.com/qbittorrent/qBittorrent (no official
+#                 Docker image — the community image commonly used is
+#                 linuxserver.io's: https://docs.linuxserver.io/images/docker-qbittorrent/)
+#   Gluetun:      https://github.com/qdm12/gluetun-wiki (official docs live
+#                 in the project's GitHub wiki)
+#   Jellyseerr:   https://github.com/Fallenbagel/jellyseerr
+#   Maintainerr:  https://github.com/jorenn92/Maintainerr
+
+- name: Create media_stack directory
+  ansible.builtin.file:
+    path: /opt/media_stack
+    state: directory
+    mode: "0755"
+
+- name: Template docker-compose.yml
+  ansible.builtin.template:
+    src: docker-compose.yml.j2
+    dest: /opt/media_stack/docker-compose.yml
+    mode: "0644"
+
+- name: Start media_stack
+  community.docker.docker_compose_v2:
+    project_src: /opt/media_stack
+    state: present

@@ -1,0 +1,34 @@
+---
+# traefik
+#
+# Config-as-code reverse proxy, replacing NPM. Compose file + static/dynamic
+# config are templated from Traefik's own official docs:
+# https://doc.traefik.io/traefik/getting-started/install-traefik/
+# (Docker Compose section) — GitHub used only if docs are missing something:
+# https://github.com/traefik/traefik
+
+- name: Create traefik directory structure
+  ansible.builtin.file:
+    path: "/opt/traefik/{{ item }}"
+    state: directory
+    mode: "0755"
+  loop:
+    - ""
+    - dynamic
+
+- name: Template traefik static config
+  ansible.builtin.template:
+    src: traefik.yml.j2
+    dest: /opt/traefik/traefik.yml
+    mode: "0644"
+
+- name: Template docker-compose.yml
+  ansible.builtin.template:
+    src: docker-compose.yml.j2
+    dest: /opt/traefik/docker-compose.yml
+    mode: "0644"
+
+- name: Start traefik
+  community.docker.docker_compose_v2:
+    project_src: /opt/traefik
+    state: present

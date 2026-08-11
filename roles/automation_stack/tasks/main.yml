@@ -1,0 +1,24 @@
+---
+# automation_stack — Home Assistant, Ollama, Paperless-NGX.
+#
+# Sourcing:
+#   Home Assistant: https://www.home-assistant.io/installation/linux#install-home-assistant-container
+#   Ollama:          https://github.com/ollama/ollama (Docker section in README)
+#   Paperless-NGX:   https://docs.paperless-ngx.com/setup/#docker
+
+- name: Create automation_stack directory
+  ansible.builtin.file:
+    path: /opt/automation_stack
+    state: directory
+    mode: "0755"
+
+- name: Template docker-compose.yml
+  ansible.builtin.template:
+    src: docker-compose.yml.j2
+    dest: /opt/automation_stack/docker-compose.yml
+    mode: "0644"
+
+- name: Start automation_stack
+  community.docker.docker_compose_v2:
+    project_src: /opt/automation_stack
+    state: present

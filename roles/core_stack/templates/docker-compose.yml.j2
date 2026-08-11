@@ -1,0 +1,20 @@
+# TODO: SKELETON only — replace with real config from each app's official
+# docs (see tasks/main.yml for links).
+services:
+  authelia:
+    image: authelia/authelia
+    container_name: authelia
+    restart: unless-stopped
+
+  vaultwarden:
+    image: vaultwarden/server:latest
+    container_name: vaultwarden
+    restart: unless-stopped
+
+  duckdns:
+    image: lscr.io/linuxserver/duckdns
+    container_name: duckdns
+    environment:
+      SUBDOMAINS: "{{ vault_duckdns_subdomain }}"
+      TOKEN: "{{ vault_duckdns_token }}"
+    restart: unless-stopped

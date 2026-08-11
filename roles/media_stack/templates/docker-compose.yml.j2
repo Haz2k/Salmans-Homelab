@@ -1,0 +1,49 @@
+# TODO: this is a SKELETON only — replace each service block with the
+# real, current config from that app's official docs (see tasks/main.yml
+# for the exact links to use). Do not deploy this as-is.
+services:
+  gluetun:
+    image: qmcgaw/gluetun   # TODO: pin version, see gluetun-wiki
+    container_name: gluetun
+    cap_add: ["NET_ADMIN"]
+    devices: ["/dev/net/tun:/dev/net/tun"]
+    environment:
+      VPN_SERVICE_PROVIDER: "protonvpn"
+      VPN_TYPE: "wireguard"
+    restart: unless-stopped
+
+  qbittorrent:
+    image: lscr.io/linuxserver/qbittorrent   # TODO: pin version
+    container_name: qbittorrent
+    network_mode: "service:gluetun"
+    restart: unless-stopped
+
+  jellyfin:
+    image: jellyfin/jellyfin   # TODO: pin version
+    container_name: jellyfin
+    restart: unless-stopped
+
+  sonarr:
+    image: lscr.io/linuxserver/sonarr
+    container_name: sonarr
+    restart: unless-stopped
+
+  radarr:
+    image: lscr.io/linuxserver/radarr
+    container_name: radarr
+    restart: unless-stopped
+
+  prowlarr:
+    image: lscr.io/linuxserver/prowlarr
+    container_name: prowlarr
+    restart: unless-stopped
+
+  jellyseerr:
+    image: fallenbagel/jellyseerr
+    container_name: jellyseerr
+    restart: unless-stopped
+
+  maintainerr:
+    image: jorenn92/maintainerr
+    container_name: maintainerr
+    restart: unless-stopped

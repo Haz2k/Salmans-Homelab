@@ -1,0 +1,12 @@
+# TODO: SKELETON only — replace with real config from Semaphore's and
+# Diun's official docs (see tasks/main.yml for links).
+services:
+  semaphore:
+    image: semaphoreui/semaphore
+    container_name: semaphore
+    restart: unless-stopped
+
+  diun:
+    image: crazymax/diun
+    container_name: diun
+    restart: unless-stopped

@@ -1,0 +1,21 @@
+# This is a TEMPLATE only — do NOT commit real secrets here.
+#
+# At home base, run:
+#   ansible-vault create group_vars/all/vault.yml
+# and fill in real values matching these variable names, then this
+# .example file can stay in git as documentation of what's expected.
+
+vault_proxmox_api_host: "192.168.1.11"
+vault_proxmox_api_user: "ansible@pve"
+vault_proxmox_api_token_id: "ansible-token"
+vault_proxmox_api_token_secret: "CHANGE_ME"
+
+vault_pihole_webpassword: "CHANGE_ME"
+
+vault_duckdns_subdomain: "CHANGE_ME"
+vault_duckdns_token: "CHANGE_ME"
+
+vault_zfs_alert_email: "you@example.com"
+
+# Add more as each stack's real compose files get filled in
+# (Vaultwarden admin token, Authelia secrets, Grafana admin password, etc.)

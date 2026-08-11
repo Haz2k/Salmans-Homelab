@@ -1,0 +1,13 @@
+---
+# docker
+#
+# Uses the standard geerlingguy.docker Galaxy role (see requirements.yml)
+# instead of writing install tasks from scratch.
+
+- name: Install and configure Docker via geerlingguy.docker
+  ansible.builtin.import_role:
+    name: geerlingguy.docker
+  vars:
+    docker_install_compose_plugin: true
+    docker_users:
+      - ansible

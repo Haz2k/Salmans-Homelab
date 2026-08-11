@@ -1,0 +1,39 @@
+---
+# zfs_alerts
+#
+# Two jobs:
+#  1. ZFS replication between pve1 <-> pve2 (pvesr, every 15 min) — set up
+#     via Proxmox's own pvesr tool, not a generic Ansible module. Docs:
+#     https://pve.proxmox.com/wiki/Storage_Replication
+#  2. Email alerts on ZFS events (scrub failures, degraded pool, drive
+#     errors) via ZFS Event Daemon (zed) + a mail relay (Postfix as a
+#     simple relay-only MTA). This is the gap identified from other
+#     homelabbers' repos — don't rely on Grafana/Scrutiny dashboards alone
+#     for something as time-sensitive as a dying drive.
+
+- name: Ensure postfix is installed (relay-only MTA for zed alerts)
+  ansible.builtin.apt:
+    name: postfix
+    state: present
+
+# TODO: configure /etc/postfix/main.cf as a relay-only MTA pointing at
+# your real mail provider (e.g. a Gmail app password or a transactional
+# email service). Do NOT hardcode credentials here — pull from vault.
+
+- name: Enable ZED (ZFS Event Daemon) email notifications
+  ansible.builtin.lineinfile:
+    path: /etc/zfs/zed.d/zed.rc
+    regexp: "^ZED_EMAIL_ADDR="
+    line: "ZED_EMAIL_ADDR=\"{{ vault_zfs_alert_email }}\""
+    create: true
+
+- name: Restart zed to pick up config
+  ansible.builtin.systemd:
+    name: zfs-zed
+    state: restarted
+    enabled: true
+
+# TODO: pvesr replication schedule (15-min interval, pve1 <-> pve2) is
+# configured via `pvesr create-local-job` on the Proxmox host — wrap this
+# in an ansible.builtin.command with a creates/removes guard for
+# idempotency once dataset names are finalized.

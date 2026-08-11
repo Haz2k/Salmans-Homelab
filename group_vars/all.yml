@@ -1,0 +1,59 @@
+---
+# Non-secret shared variables. Secrets go in group_vars/all/vault.yml
+# (Ansible Vault encrypted — created separately, not in this scaffold).
+
+# One LXC per grouped stack (see roles/*_stack). Pi-hole is intentionally
+# kept on its own LXC, outside Docker, for DNS isolation.
+lxc_services:
+  pihole:
+    ctid: 110
+    ip: 192.168.1.20
+    cores: 1
+    memory: 512
+    node: pve1
+
+  core_stack:
+    ctid: 111
+    ip: 192.168.1.21
+    cores: 2
+    memory: 2048
+    node: pve1
+    apps: [nginx_proxy_manager_replaced_by_traefik, authelia, vaultwarden, duckdns]
+
+  media_stack:
+    ctid: 120
+    ip: 192.168.1.22
+    cores: 4
+    memory: 4096
+    node: pve2
+    apps: [jellyfin, sonarr, radarr, prowlarr, qbittorrent, gluetun, jellyseerr, maintainerr]
+
+  monitoring_stack:
+    ctid: 130
+    ip: 192.168.1.23
+    cores: 2
+    memory: 2048
+    node: pve1
+    apps: [prometheus, grafana, node_exporter, pve_exporter, cadvisor, scrutiny, uptime_kuma, speedtest_tracker]
+
+  automation_stack:
+    ctid: 140
+    ip: 192.168.1.24
+    cores: 2
+    memory: 2048
+    node: pve2
+    apps: [home_assistant, ollama, paperless_ngx]
+
+  ansible_control:
+    ctid: 100
+    ip: 192.168.1.10
+    cores: 2
+    memory: 2048
+    node: pve1
+    apps: [semaphore, diun]
+
+# Reverse proxy
+traefik_ip: "{{ lxc_services.core_stack.ip }}"
+
+# ZFS replication interval (minutes) between pve1 <-> pve2
+zfs_replication_interval_min: 15

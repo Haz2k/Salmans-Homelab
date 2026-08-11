@@ -1,0 +1,16 @@
+# TODO: replace with the real compose block from Traefik's official docs
+# https://doc.traefik.io/traefik/getting-started/install-traefik/
+# This is a placeholder structure only.
+services:
+  traefik:
+    image: traefik:v3.2   # TODO: confirm latest tag on hub.docker.com/_/traefik
+    container_name: traefik
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - /opt/traefik/traefik.yml:/etc/traefik/traefik.yml:ro
+      - /opt/traefik/dynamic:/etc/traefik/dynamic:ro
+      - /opt/traefik/acme.json:/acme.json
+      - /var/run/docker.sock:/var/run/docker.sock:ro

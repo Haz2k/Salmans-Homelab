@@ -1,0 +1,25 @@
+---
+# core_stack — Authelia, Vaultwarden, DuckDNS.
+#
+# Sourcing:
+#   Authelia:   https://www.authelia.com/integration/deployment/docker/
+#   Vaultwarden: https://github.com/dani-garcia/vaultwarden (no separate
+#                official site — README is the primary doc)
+#   DuckDNS:    https://www.duckdns.org/install.jsp (Docker section)
+
+- name: Create core_stack directory
+  ansible.builtin.file:
+    path: /opt/core_stack
+    state: directory
+    mode: "0755"
+
+- name: Template docker-compose.yml
+  ansible.builtin.template:
+    src: docker-compose.yml.j2
+    dest: /opt/core_stack/docker-compose.yml
+    mode: "0644"
+
+- name: Start core_stack
+  community.docker.docker_compose_v2:
+    project_src: /opt/core_stack
+    state: present

@@ -1,0 +1,30 @@
+---
+# pihole
+#
+# Deliberately its own LXC, NOT part of a Docker stack, so a Docker/compose
+# problem elsewhere can never take down house-wide DNS.
+#
+# Compose sourced from Pi-hole's official docs first:
+# https://docs.pi-hole.net/docker/
+# fallback: https://github.com/pi-hole/docker-pi-hole
+
+- name: Create pihole directory
+  ansible.builtin.file:
+    path: /opt/pihole
+    state: directory
+    mode: "0755"
+
+- name: Template docker-compose.yml
+  ansible.builtin.template:
+    src: docker-compose.yml.j2
+    dest: /opt/pihole/docker-compose.yml
+    mode: "0644"
+
+- name: Start pihole
+  community.docker.docker_compose_v2:
+    project_src: /opt/pihole
+    state: present
+
+# Recovery note: Pi-hole "Teleporter" export (Settings -> Teleporter) is
+# what gets saved to the flash drive's node-configs/ folder for fast
+# settings/blocklist restore without re-running the playbook.

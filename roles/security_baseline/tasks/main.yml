@@ -1,0 +1,32 @@
+---
+# security_baseline
+#
+# Prefer well-known Galaxy roles over hand-rolled tasks here (see
+# requirements.yml): geerlingguy.security, geerlingguy.firewall,
+# willshersystems.sshd. This file just wires them together with the
+# homelab-specific settings.
+
+- name: Apply SSH hardening (key-only, no root login)
+  ansible.builtin.import_role:
+    name: willshersystems.sshd
+  vars:
+    sshd_PasswordAuthentication: "no"
+    sshd_PermitRootLogin: "no"
+    sshd_AllowUsers: "ansible"
+
+- name: Apply base OS security (fail2ban, auto-updates, etc.)
+  ansible.builtin.import_role:
+    name: geerlingguy.security
+
+- name: Apply firewall baseline
+  ansible.builtin.import_role:
+    name: geerlingguy.firewall
+  vars:
+    firewall_allowed_tcp_ports:
+      - "22"      # SSH
+      - "8006"    # Proxmox UI (Tailscale-only in practice — see notes.md)
+
+# TODO once at home base:
+# - Proxmox UI 2FA (TOTP) is configured manually in the web UI, not via
+#   Ansible — Proxmox doesn't expose this via API in a clean idempotent way.
+# - Confirm Proxmox UI port 8006 is only reachable via Tailscale, not LAN/WAN.
