@@ -1,49 +1,118 @@
-# TODO: this is a SKELETON only — replace each service block with the
-# real, current config from that app's official docs (see tasks/main.yml
-# for the exact links to use). Do not deploy this as-is.
+# Sources (official docs, per app):
+#   Gluetun:     https://github.com/qdm12/gluetun-wiki/blob/main/setup/providers/protonvpn.md
+#   qBittorrent: https://docs.linuxserver.io/images/docker-qbittorrent/ (linuxserver — no official qBittorrent image)
+#   Jellyfin:    https://jellyfin.org/docs/general/installation/container/
+#   Sonarr/Radarr/Prowlarr: https://wiki.servarr.com/<app>/installation/docker
+#   Jellyseerr:  https://github.com/Fallenbagel/jellyseerr#-installation
+#   Maintainerr: https://github.com/jorenn92/Maintainerr#docker-compose
+
 services:
   gluetun:
-    image: qmcgaw/gluetun   # TODO: pin version, see gluetun-wiki
+    image: qmcgaw/gluetun
     container_name: gluetun
-    cap_add: ["NET_ADMIN"]
-    devices: ["/dev/net/tun:/dev/net/tun"]
+    cap_add:
+      - NET_ADMIN
+    devices:
+      - /dev/net/tun:/dev/net/tun
+    ports:
+      - "8080:8080"   # qbittorrent WebUI, exposed via gluetun's network namespace
+      - "6881:6881"
+      - "6881:6881/udp"
+    volumes:
+      - /opt/media_stack/gluetun:/gluetun
     environment:
-      VPN_SERVICE_PROVIDER: "protonvpn"
-      VPN_TYPE: "wireguard"
+      VPN_SERVICE_PROVIDER: protonvpn
+      VPN_TYPE: wireguard
+      WIREGUARD_PRIVATE_KEY: "{{ vault_protonvpn_wireguard_private_key }}"
+      VPN_PORT_FORWARDING: "on"
+      VPN_PORT_FORWARDING_PROVIDER: protonvpn
+      SERVER_COUNTRIES: "{{ vault_protonvpn_server_country | default('Netherlands') }}"
     restart: unless-stopped
 
   qbittorrent:
-    image: lscr.io/linuxserver/qbittorrent   # TODO: pin version
+    image: lscr.io/linuxserver/qbittorrent:latest
     container_name: qbittorrent
     network_mode: "service:gluetun"
+    depends_on:
+      - gluetun
+    environment:
+      PUID: 1000
+      PGID: 1000
+      TZ: "{{ vault_timezone }}"
+      WEBUI_PORT: 8080
+    volumes:
+      - /opt/media_stack/qbittorrent:/config
+      - /mnt/media/downloads:/downloads
     restart: unless-stopped
 
   jellyfin:
-    image: jellyfin/jellyfin   # TODO: pin version
+    image: jellyfin/jellyfin:latest
     container_name: jellyfin
+    ports:
+      - "8096:8096"
+    volumes:
+      - /opt/media_stack/jellyfin/config:/config
+      - /opt/media_stack/jellyfin/cache:/cache
+      - /mnt/media:/media
     restart: unless-stopped
 
   sonarr:
-    image: lscr.io/linuxserver/sonarr
+    image: lscr.io/linuxserver/sonarr:latest
     container_name: sonarr
+    environment:
+      PUID: 1000
+      PGID: 1000
+      TZ: "{{ vault_timezone }}"
+    volumes:
+      - /opt/media_stack/sonarr:/config
+      - /mnt/media:/media
+    ports:
+      - "8989:8989"
     restart: unless-stopped
 
   radarr:
-    image: lscr.io/linuxserver/radarr
+    image: lscr.io/linuxserver/radarr:latest
     container_name: radarr
+    environment:
+      PUID: 1000
+      PGID: 1000
+      TZ: "{{ vault_timezone }}"
+    volumes:
+      - /opt/media_stack/radarr:/config
+      - /mnt/media:/media
+    ports:
+      - "7878:7878"
     restart: unless-stopped
 
   prowlarr:
-    image: lscr.io/linuxserver/prowlarr
+    image: lscr.io/linuxserver/prowlarr:latest
     container_name: prowlarr
+    environment:
+      PUID: 1000
+      PGID: 1000
+      TZ: "{{ vault_timezone }}"
+    volumes:
+      - /opt/media_stack/prowlarr:/config
+    ports:
+      - "9696:9696"
     restart: unless-stopped
 
   jellyseerr:
-    image: fallenbagel/jellyseerr
+    image: fallenbagel/jellyseerr:latest
     container_name: jellyseerr
+    environment:
+      TZ: "{{ vault_timezone }}"
+    ports:
+      - "5055:5055"
+    volumes:
+      - /opt/media_stack/jellyseerr:/app/config
     restart: unless-stopped
 
   maintainerr:
-    image: jorenn92/maintainerr
+    image: ghcr.io/jorenn92/maintainerr:latest
     container_name: maintainerr
+    volumes:
+      - /opt/media_stack/maintainerr:/opt/data
+    ports:
+      - "6246:6246"
     restart: unless-stopped

@@ -1,37 +1,103 @@
-# TODO: SKELETON only — replace with real config from each app's official
-# docs (see tasks/main.yml for links).
+# Sources (official docs, per app):
+#   Prometheus:   https://prometheus.io/docs/prometheus/latest/installation/
+#   Grafana:      https://grafana.com/docs/grafana/latest/setup-grafana/installation/docker/
+#   node_exporter: https://github.com/prometheus/node_exporter#docker
+#   pve_exporter:  https://github.com/prometheus-pve/prometheus-pve-exporter#docker
+#   cadvisor:     https://github.com/google/cadvisor/blob/master/docs/running.md#docker
+#   Scrutiny:     https://github.com/AnalogJ/scrutiny#docker-compose-recommended
+#   Uptime Kuma:  https://github.com/louislam/uptime-kuma/wiki/%F0%9F%94%A7-How-to-Install
+#   Speedtest Tracker: https://docs.speedtest-tracker.dev/getting-started/installation
+
 services:
   prometheus:
-    image: prom/prometheus
+    image: prom/prometheus:latest
     container_name: prometheus
+    volumes:
+      - /opt/monitoring_stack/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - /opt/monitoring_stack/prometheus/data:/prometheus
+    ports:
+      - "9090:9090"
     restart: unless-stopped
 
   grafana:
-    image: grafana/grafana
+    image: grafana/grafana:latest
     container_name: grafana
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: "{{ vault_grafana_admin_password }}"
+    volumes:
+      - /opt/monitoring_stack/grafana:/var/lib/grafana
+    ports:
+      - "3000:3000"
     restart: unless-stopped
 
   node_exporter:
-    image: prom/node-exporter
+    image: prom/node-exporter:latest
     container_name: node_exporter
+    pid: host
+    volumes:
+      - /:/host:ro,rslave
+    command:
+      - '--path.rootfs=/host'
+    ports:
+      - "9100:9100"
+    restart: unless-stopped
+
+  pve_exporter:
+    image: prompve/prometheus-pve-exporter:latest
+    container_name: pve_exporter
+    volumes:
+      - /opt/monitoring_stack/pve_exporter/pve.yml:/etc/prometheus/pve.yml
+    ports:
+      - "9221:9221"
     restart: unless-stopped
 
   cadvisor:
-    image: gcr.io/cadvisor/cadvisor
+    image: gcr.io/cadvisor/cadvisor:latest
     container_name: cadvisor
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:ro
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+    ports:
+      - "8085:8080"
     restart: unless-stopped
 
   scrutiny:
-    image: ghcr.io/analogj/scrutiny
+    image: ghcr.io/analogj/scrutiny:latest
     container_name: scrutiny
+    cap_add:
+      - SYS_RAWIO
+      - SYS_ADMIN
+    volumes:
+      - /run/udev:/run/udev:ro
+      - /opt/monitoring_stack/scrutiny/config:/opt/scrutiny/config
+      - /opt/monitoring_stack/scrutiny/influxdb:/opt/scrutiny/influxdb
+    devices:
+      - "/dev/sda:/dev/sda"   # TODO: confirm real device paths per node
+    ports:
+      - "8082:8080"
     restart: unless-stopped
 
   uptime_kuma:
-    image: louislam/uptime-kuma
+    image: louislam/uptime-kuma:latest
     container_name: uptime_kuma
+    volumes:
+      - /opt/monitoring_stack/uptime_kuma:/app/data
+    ports:
+      - "3001:3001"
     restart: unless-stopped
 
   speedtest_tracker:
-    image: lscr.io/linuxserver/speedtest-tracker
+    image: lscr.io/linuxserver/speedtest-tracker:latest
     container_name: speedtest_tracker
+    environment:
+      PUID: 1000
+      PGID: 1000
+      TZ: "{{ vault_timezone }}"
+      APP_KEY: "{{ vault_speedtest_tracker_app_key }}"
+    volumes:
+      - /opt/monitoring_stack/speedtest_tracker:/config
+    ports:
+      - "8765:80"
     restart: unless-stopped

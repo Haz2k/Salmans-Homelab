@@ -1,0 +1,36 @@
+# Source: https://www.authelia.com/configuration/methods/files/
+theme: dark
+
+server:
+  address: 'tcp://:9091'
+
+log:
+  level: info
+
+totp:
+  issuer: "{{ vault_domain }}"
+
+authentication_backend:
+  file:
+    path: /config/users_database.yml
+
+access_control:
+  default_policy: deny
+  rules:
+    - domain: "*.{{ vault_domain }}"
+      policy: two_factor
+
+session:
+  secret: "{{ vault_authelia_session_secret }}"
+  cookies:
+    - domain: "{{ vault_domain }}"
+      authelia_url: "https://auth.{{ vault_domain }}"
+
+storage:
+  encryption_key: "{{ vault_authelia_storage_encryption_key }}"
+  local:
+    path: /config/db.sqlite3
+
+notifier:
+  filesystem:
+    filename: /config/notification.txt

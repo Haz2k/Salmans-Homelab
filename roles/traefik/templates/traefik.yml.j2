@@ -1,15 +1,24 @@
-# TODO: replace with real static config from Traefik's official docs:
-# https://doc.traefik.io/traefik/reference/static-configuration/file/
-# Placeholder only.
+# Source: Traefik official docs — https://doc.traefik.io/traefik/reference/static-configuration/file/
+api:
+  dashboard: true
+  insecure: false   # access dashboard via a routed subdomain, not :8080 directly
+
 entryPoints:
   web:
     address: ":80"
+    http:
+      redirections:
+        entryPoint:
+          to: websecure
+          scheme: https
   websecure:
     address: ":443"
 
 providers:
   docker:
+    endpoint: "unix:///var/run/docker.sock"
     exposedByDefault: false
+    network: proxy
   file:
     directory: /etc/traefik/dynamic
     watch: true
@@ -17,7 +26,10 @@ providers:
 certificatesResolvers:
   letsencrypt:
     acme:
-      email: "TODO@example.com"
+      email: "{{ vault_traefik_acme_email }}"
       storage: /acme.json
       httpChallenge:
         entryPoint: web
+
+log:
+  level: INFO

@@ -69,3 +69,17 @@ When a well-known, actively maintained Galaxy role exists for a job,
 use it (see `requirements.yml`) instead of writing one from scratch.
 For app-specific compose/config files, source from the app's official
 docs/website first, falling back to its official GitHub repo.
+
+## Status of the compose files
+
+Every role's `docker-compose.yml.j2` (and supporting config templates,
+e.g. Authelia's `configuration.yml` / `users_database.yml`, Prometheus's
+scrape config) is filled in with real, current settings pulled from each
+app's own official docs — not placeholders. Source links are at the top
+of every task file. Still TODO before first run:
+- Real IPs in `inventory/hosts.yml`
+- Real values in `group_vars/all/vault.yml` (see `vault.yml.example` for
+  every key that's expected)
+- Confirm the LXC OS template name in `proxmox_lxc_provision` matches
+  what's actually on your Proxmox storage
+- Scrutiny's `/dev/sda` device path — confirm real disk paths per node

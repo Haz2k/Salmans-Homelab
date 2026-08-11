@@ -2,20 +2,61 @@
 #
 # At home base, run:
 #   ansible-vault create group_vars/all/vault.yml
-# and fill in real values matching these variable names, then this
-# .example file can stay in git as documentation of what's expected.
+# and fill in real values matching these variable names.
 
+# --- Proxmox API (proxmox_lxc_provision role) ---
 vault_proxmox_api_host: "192.168.1.11"
 vault_proxmox_api_user: "ansible@pve"
 vault_proxmox_api_token_id: "ansible-token"
 vault_proxmox_api_token_secret: "CHANGE_ME"
 
+# --- Shared ---
+vault_timezone: "America/New_York"
+vault_domain: "yourdomain.com"
+
+# --- Traefik ---
+vault_traefik_acme_email: "you@example.com"
+
+# --- Pi-hole ---
 vault_pihole_webpassword: "CHANGE_ME"
 
+# --- core_stack: Authelia ---
+vault_authelia_session_secret: "CHANGE_ME_64_CHAR_RANDOM"
+vault_authelia_storage_encryption_key: "CHANGE_ME_64_CHAR_RANDOM"
+vault_authelia_admin_email: "you@example.com"
+vault_authelia_admin_password_hash: "CHANGE_ME_ARGON2_HASH"
+
+# --- core_stack: Vaultwarden ---
+vault_vaultwarden_admin_token: "CHANGE_ME"
+
+# --- core_stack: DuckDNS ---
 vault_duckdns_subdomain: "CHANGE_ME"
 vault_duckdns_token: "CHANGE_ME"
 
-vault_zfs_alert_email: "you@example.com"
+# --- media_stack: Gluetun / ProtonVPN ---
+vault_protonvpn_wireguard_private_key: "CHANGE_ME"
+vault_protonvpn_server_country: "Netherlands"
 
-# Add more as each stack's real compose files get filled in
-# (Vaultwarden admin token, Authelia secrets, Grafana admin password, etc.)
+# --- monitoring_stack ---
+vault_grafana_admin_password: "CHANGE_ME"
+vault_speedtest_tracker_app_key: "CHANGE_ME_BASE64"
+
+# --- automation_stack: Paperless-ngx ---
+vault_paperless_db_password: "CHANGE_ME"
+vault_paperless_secret_key: "CHANGE_ME_LONG_RANDOM"
+
+# --- ansible_control: Semaphore ---
+vault_semaphore_db_password: "CHANGE_ME"
+vault_semaphore_admin_password: "CHANGE_ME"
+vault_semaphore_admin_email: "you@example.com"
+vault_semaphore_access_key_encryption: "CHANGE_ME_BASE64_32BYTE"
+
+# --- ansible_control: Diun email notifications ---
+vault_smtp_host: "smtp.example.com"
+vault_smtp_port: "587"
+vault_smtp_username: "CHANGE_ME"
+vault_smtp_password: "CHANGE_ME"
+vault_smtp_from: "diun@yourdomain.com"
+
+# --- zfs_alerts ---
+vault_zfs_alert_email: "you@example.com"

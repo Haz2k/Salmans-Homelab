@@ -1,12 +1,60 @@
-# TODO: SKELETON only — replace with real config from Semaphore's and
-# Diun's official docs (see tasks/main.yml for links).
+# Sources (official docs):
+#   Semaphore: https://semaphoreui.com/docs/admin-guide/installation/docker
+#   Diun:      https://crazymax.dev/diun/install/docker/
+
 services:
+  semaphore-db:
+    image: postgres:17
+    container_name: semaphore-db
+    hostname: postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: semaphore
+      POSTGRES_PASSWORD: "{{ vault_semaphore_db_password }}"
+      POSTGRES_DB: semaphore
+    volumes:
+      - /opt/ansible_control/semaphore-db:/var/lib/postgresql/data
+
   semaphore:
-    image: semaphoreui/semaphore
+    image: semaphoreui/semaphore:latest
     container_name: semaphore
     restart: unless-stopped
+    depends_on:
+      - semaphore-db
+    ports:
+      - "3000:3000"
+    environment:
+      SEMAPHORE_DB_USER: semaphore
+      SEMAPHORE_DB_PASS: "{{ vault_semaphore_db_password }}"
+      SEMAPHORE_DB_HOST: postgres
+      SEMAPHORE_DB_PORT: 5432
+      SEMAPHORE_DB_DIALECT: postgres
+      SEMAPHORE_DB: semaphore
+      SEMAPHORE_PLAYBOOK_PATH: /tmp/semaphore/
+      SEMAPHORE_ADMIN_PASSWORD: "{{ vault_semaphore_admin_password }}"
+      SEMAPHORE_ADMIN_NAME: admin
+      SEMAPHORE_ADMIN_EMAIL: "{{ vault_semaphore_admin_email }}"
+      SEMAPHORE_ADMIN: admin
+      SEMAPHORE_ACCESS_KEY_ENCRYPTION: "{{ vault_semaphore_access_key_encryption }}"
+    volumes:
+      - /opt/ansible_control/semaphore-data:/var/lib/semaphore
 
   diun:
-    image: crazymax/diun
+    image: crazymax/diun:latest
     container_name: diun
+    command: serve
+    volumes:
+      - /opt/ansible_control/diun:/data
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    environment:
+      TZ: "{{ vault_timezone }}"
+      DIUN_WATCH_WORKERS: 20
+      DIUN_WATCH_SCHEDULE: "0 */6 * * *"
+      DIUN_PROVIDERS_DOCKER: "true"
+      DIUN_NOTIF_MAIL_HOST: "{{ vault_smtp_host }}"
+      DIUN_NOTIF_MAIL_PORT: "{{ vault_smtp_port }}"
+      DIUN_NOTIF_MAIL_USERNAME: "{{ vault_smtp_username }}"
+      DIUN_NOTIF_MAIL_PASSWORD: "{{ vault_smtp_password }}"
+      DIUN_NOTIF_MAIL_FROM: "{{ vault_smtp_from }}"
+      DIUN_NOTIF_MAIL_TO: "{{ vault_zfs_alert_email }}"
     restart: unless-stopped

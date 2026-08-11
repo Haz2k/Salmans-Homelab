@@ -1,20 +1,57 @@
-# TODO: SKELETON only — replace with real config from each app's official
-# docs (see tasks/main.yml for links).
+# Sources (official docs, per app):
+#   Authelia:    https://www.authelia.com/integration/deployment/docker/
+#   Vaultwarden: https://github.com/dani-garcia/vaultwarden (README — no separate docs site)
+#   DuckDNS:     https://www.duckdns.org/install.jsp (Docker section)
+
 services:
   authelia:
-    image: authelia/authelia
+    image: authelia/authelia:latest
     container_name: authelia
+    volumes:
+      - /opt/core_stack/authelia:/config
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.authelia.rule=Host(`auth.{{ vault_domain }}`)"
+      - "traefik.http.routers.authelia.entrypoints=websecure"
+      - "traefik.http.routers.authelia.tls.certresolver=letsencrypt"
+      - "traefik.http.middlewares.authelia.forwardauth.address=http://authelia:9091/api/verify?rd=https://auth.{{ vault_domain }}"
+    networks:
+      - proxy
+    expose:
+      - 9091
     restart: unless-stopped
 
   vaultwarden:
     image: vaultwarden/server:latest
     container_name: vaultwarden
+    environment:
+      DOMAIN: "https://vault.{{ vault_domain }}"
+      SIGNUPS_ALLOWED: "false"
+      ADMIN_TOKEN: "{{ vault_vaultwarden_admin_token }}"
+    volumes:
+      - /opt/core_stack/vaultwarden:/data
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.vaultwarden.rule=Host(`vault.{{ vault_domain }}`)"
+      - "traefik.http.routers.vaultwarden.entrypoints=websecure"
+      - "traefik.http.routers.vaultwarden.tls.certresolver=letsencrypt"
+    networks:
+      - proxy
     restart: unless-stopped
 
   duckdns:
-    image: lscr.io/linuxserver/duckdns
+    image: lscr.io/linuxserver/duckdns:latest
     container_name: duckdns
     environment:
+      PUID: 1000
+      PGID: 1000
+      TZ: "{{ vault_timezone }}"
       SUBDOMAINS: "{{ vault_duckdns_subdomain }}"
       TOKEN: "{{ vault_duckdns_token }}"
+      UPDATE_IP: "ipv4"
     restart: unless-stopped
+
+networks:
+  proxy:
+    name: proxy
+    external: true

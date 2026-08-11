@@ -1,17 +1,21 @@
-# TODO: replace with the real compose block from Pi-hole's official docs
-# https://docs.pi-hole.net/docker/
+# Source: Pi-hole official docs — https://docs.pi-hole.net/docker/
 services:
   pihole:
     container_name: pihole
-    image: pihole/pihole:latest   # TODO: pin a version tag
+    image: pihole/pihole:2025.07.0
+    hostname: pihole
+    restart: unless-stopped
     ports:
       - "53:53/tcp"
       - "53:53/udp"
-      - "80:80/tcp"
+      - "67:67/udp"   # DHCP, only if Pi-hole handles DHCP
+      - "8081:80/tcp" # web UI, mapped off 80 since Traefik owns 80/443 elsewhere
     environment:
-      TZ: "America/New_York"   # TODO: confirm timezone
-      WEBPASSWORD: "{{ vault_pihole_webpassword }}"
+      TZ: "{{ vault_timezone }}"
+      FTLCONF_webserver_api_password: "{{ vault_pihole_webpassword }}"
+      FTLCONF_dns_listeningMode: "all"
     volumes:
       - /opt/pihole/etc-pihole:/etc/pihole
       - /opt/pihole/etc-dnsmasq.d:/etc/dnsmasq.d
-    restart: unless-stopped
+    cap_add:
+      - NET_ADMIN

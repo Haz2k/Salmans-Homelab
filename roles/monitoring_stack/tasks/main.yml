@@ -13,16 +13,25 @@
 #                in README)
 #   Speedtest Tracker: https://docs.speedtest-tracker.dev/getting-started/installation
 
-- name: Create monitoring_stack directory
+- name: Create monitoring_stack directories
   ansible.builtin.file:
-    path: /opt/monitoring_stack
+    path: "{{ item }}"
     state: directory
     mode: "0755"
+  loop:
+    - /opt/monitoring_stack
+    - /opt/monitoring_stack/prometheus
 
 - name: Template docker-compose.yml
   ansible.builtin.template:
     src: docker-compose.yml.j2
     dest: /opt/monitoring_stack/docker-compose.yml
+    mode: "0644"
+
+- name: Template prometheus.yml
+  ansible.builtin.template:
+    src: prometheus.yml.j2
+    dest: /opt/monitoring_stack/prometheus/prometheus.yml
     mode: "0644"
 
 - name: Start monitoring_stack

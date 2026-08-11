@@ -1,17 +1,81 @@
-# TODO: SKELETON only — replace with real config from each app's official
-# docs (see tasks/main.yml for links).
+# Sources (official docs, per app):
+#   Home Assistant: https://www.home-assistant.io/installation/linux#install-home-assistant-container
+#   Ollama:          https://github.com/ollama/ollama/blob/main/docs/docker.md
+#   Paperless-ngx:   https://github.com/paperless-ngx/paperless-ngx/blob/main/docker/compose/docker-compose.postgres-tika.yml
+
 services:
   homeassistant:
     image: ghcr.io/home-assistant/home-assistant:stable
     container_name: homeassistant
+    volumes:
+      - /opt/automation_stack/homeassistant:/config
+      - /etc/localtime:/etc/localtime:ro
     restart: unless-stopped
+    network_mode: host   # required for device discovery (HA official recommendation)
 
   ollama:
-    image: ollama/ollama
+    image: ollama/ollama:latest
     container_name: ollama
+    volumes:
+      - /opt/automation_stack/ollama:/root/.ollama
+    ports:
+      - "11434:11434"
+    restart: unless-stopped
+
+  paperless-broker:
+    image: docker.io/library/redis:7
+    container_name: paperless-broker
+    restart: unless-stopped
+    volumes:
+      - /opt/automation_stack/paperless/redisdata:/data
+
+  paperless-db:
+    image: docker.io/library/postgres:16
+    container_name: paperless-db
+    restart: unless-stopped
+    volumes:
+      - /opt/automation_stack/paperless/pgdata:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: paperless
+      POSTGRES_USER: paperless
+      POSTGRES_PASSWORD: "{{ vault_paperless_db_password }}"
+
+  paperless-gotenberg:
+    image: docker.io/gotenberg/gotenberg:8
+    container_name: paperless-gotenberg
+    restart: unless-stopped
+    command:
+      - "gotenberg"
+      - "--chromium-disable-javascript=true"
+      - "--chromium-allow-list=file:///tmp/.*"
+
+  paperless-tika:
+    image: ghcr.io/paperless-ngx/tika:latest
+    container_name: paperless-tika
     restart: unless-stopped
 
   paperless:
     image: ghcr.io/paperless-ngx/paperless-ngx:latest
     container_name: paperless
     restart: unless-stopped
+    depends_on:
+      - paperless-db
+      - paperless-broker
+      - paperless-gotenberg
+      - paperless-tika
+    ports:
+      - "8000:8000"
+    volumes:
+      - /opt/automation_stack/paperless/data:/usr/src/paperless/data
+      - /opt/automation_stack/paperless/media:/usr/src/paperless/media
+      - /opt/automation_stack/paperless/export:/usr/src/paperless/export
+      - /opt/automation_stack/paperless/consume:/usr/src/paperless/consume
+    environment:
+      PAPERLESS_REDIS: redis://paperless-broker:6379
+      PAPERLESS_DBHOST: paperless-db
+      PAPERLESS_DBENGINE: postgresql
+      PAPERLESS_TIKA_ENABLED: 1
+      PAPERLESS_TIKA_GOTENBERG_ENDPOINT: http://paperless-gotenberg:3000
+      PAPERLESS_TIKA_ENDPOINT: http://paperless-tika:9998
+      PAPERLESS_SECRET_KEY: "{{ vault_paperless_secret_key }}"
+      PAPERLESS_TIME_ZONE: "{{ vault_timezone }}"

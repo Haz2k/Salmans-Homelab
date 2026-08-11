@@ -1,0 +1,10 @@
+# Source: https://www.authelia.com/reference/guides/passwords/
+# Generate hashes with: docker run authelia/authelia authelia crypto hash generate argon2 --password 'yourpassword'
+users:
+  salman:
+    disabled: false
+    displayname: "Salman"
+    email: "{{ vault_authelia_admin_email }}"
+    password: "{{ vault_authelia_admin_password_hash }}"
+    groups:
+      - admins
