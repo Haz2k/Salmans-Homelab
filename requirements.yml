@@ -8,11 +8,11 @@ roles:
   - name: geerlingguy.docker
     version: "7.4.1"
   - name: geerlingguy.security
-    version: "3.0.0"
+    version: "3.0.2"
   - name: geerlingguy.firewall
-    version: "3.0.0"
+    version: "2.7.0"
   - name: willshersystems.sshd
-    version: "1.0.0"
+    version: "v0.31.0"
 
 collections:
   - name: community.general
