@@ -7,14 +7,14 @@
 lxc_services:
   pihole:
     ctid: 110
-    ip: 192.168.1.20
+    ip: 192.168.0.10
     cores: 1
     memory: 512
     node: pve1
 
   core_stack:
     ctid: 111
-    ip: 192.168.1.21
+    ip: 192.168.0.11
     cores: 2
     memory: 2048
     node: pve1
@@ -22,7 +22,7 @@ lxc_services:
 
   media_stack:
     ctid: 120
-    ip: 192.168.1.22
+    ip: 192.168.0.12
     cores: 4
     memory: 4096
     node: pve2
@@ -30,7 +30,7 @@ lxc_services:
 
   monitoring_stack:
     ctid: 130
-    ip: 192.168.1.23
+    ip: 192.168.0.13
     cores: 2
     memory: 2048
     node: pve1
@@ -38,7 +38,7 @@ lxc_services:
 
   automation_stack:
     ctid: 140
-    ip: 192.168.1.24
+    ip: 192.168.0.14
     cores: 2
     memory: 2048
     node: pve2
@@ -46,7 +46,7 @@ lxc_services:
 
   ansible_control:
     ctid: 100
-    ip: 192.168.1.10
+    ip: 192.168.0.15
     cores: 2
     memory: 2048
     node: pve1

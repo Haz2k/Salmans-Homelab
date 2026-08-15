@@ -32,9 +32,9 @@ services:
       SEMAPHORE_DB: semaphore
       SEMAPHORE_PLAYBOOK_PATH: /tmp/semaphore/
       SEMAPHORE_ADMIN_PASSWORD: "{{ vault_semaphore_admin_password }}"
-      SEMAPHORE_ADMIN_NAME: admin
+      SEMAPHORE_ADMIN_NAME: "{{ vault_semaphore_admin_name }}"
       SEMAPHORE_ADMIN_EMAIL: "{{ vault_semaphore_admin_email }}"
-      SEMAPHORE_ADMIN: admin
+      SEMAPHORE_ADMIN: "{{ vault_semaphore_admin_name }}"
       SEMAPHORE_ACCESS_KEY_ENCRYPTION: "{{ vault_semaphore_access_key_encryption }}"
     volumes:
       - /opt/ansible_control/semaphore-data:/var/lib/semaphore
