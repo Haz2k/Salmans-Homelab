@@ -5,7 +5,7 @@
 # and fill in real values matching these variable names.
 
 # --- Proxmox API (proxmox_lxc_provision role) ---
-vault_proxmox_api_host: "192.168.1.11"
+vault_proxmox_api_host: "192.168.0.100"
 vault_proxmox_api_user: "ansible@pve"
 vault_proxmox_api_token_id: "ansible-token"
 vault_proxmox_api_token_secret: "CHANGE_ME"
