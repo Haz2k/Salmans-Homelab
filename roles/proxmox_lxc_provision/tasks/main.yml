@@ -38,7 +38,7 @@
 
 - name: Add TUN cgroup + mount entries for media_stack LXC (Gluetun requires /dev/net/tun)
   ansible.builtin.lineinfile:
-    path: "/etc/pve/lxc/{{ lxc_services.media_stack.ctid }}.conf"
+    path: "/etc/pve/nodes/{{ lxc_services.media_stack.node }}/lxc/{{ lxc_services.media_stack.ctid }}.conf"
     line: "{{ item }}"
     create: false
   loop:
@@ -48,6 +48,7 @@
 
 - name: Reboot media_stack LXC if TUN config changed
   ansible.builtin.command: "pct reboot {{ lxc_services.media_stack.ctid }}"
+  delegate_to: "{{ lxc_services.media_stack.node }}"
   when: tun_conf_result.results | selectattr('changed') | list | length > 0
 
 # NOTE: API token vars (vault_proxmox_api_*) live in group_vars/all/vault.yml,
