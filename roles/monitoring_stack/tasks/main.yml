@@ -21,6 +21,27 @@
   loop:
     - /opt/monitoring_stack
     - /opt/monitoring_stack/prometheus
+    - /opt/monitoring_stack/prometheus/data
+    - /opt/monitoring_stack/grafana
+    - /opt/monitoring_stack/pve_exporter
+
+# Grafana (UID/GID 472) and Prometheus (UID/GID 65534 = nobody) run as
+# non-root inside their containers and can't write to bind-mounted host
+# folders owned by root by default. Fix ownership before the stack starts
+# so this doesn't need a manual chown on every rebuild.
+- name: Set ownership for Grafana data directory
+  ansible.builtin.file:
+    path: /opt/monitoring_stack/grafana
+    owner: "472"
+    group: "472"
+    recurse: true
+
+- name: Set ownership for Prometheus data directory
+  ansible.builtin.file:
+    path: /opt/monitoring_stack/prometheus/data
+    owner: "65534"
+    group: "65534"
+    recurse: true
 
 - name: Template docker-compose.yml
   ansible.builtin.template:
