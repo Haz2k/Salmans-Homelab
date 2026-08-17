@@ -1,0 +1,83 @@
+# Static routes for media_stack — a separate LXC from Traefik, so Docker-label
+# discovery doesn't apply here. Points directly at the media_stack LXC IP.
+http:
+  routers:
+    jellyfin:
+      rule: "Host(`media.{{ vault_domain }}`)"
+      entrypoints:
+        - websecure
+      service: jellyfin
+      tls:
+        certResolver: letsencrypt
+    sonarr:
+      rule: "Host(`sonarr.{{ vault_domain }}`)"
+      entrypoints:
+        - websecure
+      service: sonarr
+      tls:
+        certResolver: letsencrypt
+    radarr:
+      rule: "Host(`radarr.{{ vault_domain }}`)"
+      entrypoints:
+        - websecure
+      service: radarr
+      tls:
+        certResolver: letsencrypt
+    prowlarr:
+      rule: "Host(`prowlarr.{{ vault_domain }}`)"
+      entrypoints:
+        - websecure
+      service: prowlarr
+      tls:
+        certResolver: letsencrypt
+    jellyseerr:
+      rule: "Host(`requests.{{ vault_domain }}`)"
+      entrypoints:
+        - websecure
+      service: jellyseerr
+      tls:
+        certResolver: letsencrypt
+    maintainerr:
+      rule: "Host(`maintainerr.{{ vault_domain }}`)"
+      entrypoints:
+        - websecure
+      service: maintainerr
+      tls:
+        certResolver: letsencrypt
+    qbittorrent:
+      rule: "Host(`qbit.{{ vault_domain }}`)"
+      entrypoints:
+        - websecure
+      service: qbittorrent
+      tls:
+        certResolver: letsencrypt
+
+  services:
+    jellyfin:
+      loadBalancer:
+        servers:
+          - url: "http://{{ lxc_services.media_stack.ip }}:8096"
+    sonarr:
+      loadBalancer:
+        servers:
+          - url: "http://{{ lxc_services.media_stack.ip }}:8989"
+    radarr:
+      loadBalancer:
+        servers:
+          - url: "http://{{ lxc_services.media_stack.ip }}:7878"
+    prowlarr:
+      loadBalancer:
+        servers:
+          - url: "http://{{ lxc_services.media_stack.ip }}:9696"
+    jellyseerr:
+      loadBalancer:
+        servers:
+          - url: "http://{{ lxc_services.media_stack.ip }}:5055"
+    maintainerr:
+      loadBalancer:
+        servers:
+          - url: "http://{{ lxc_services.media_stack.ip }}:6246"
+    qbittorrent:
+      loadBalancer:
+        servers:
+          - url: "http://{{ lxc_services.media_stack.ip }}:8080"
