@@ -50,7 +50,7 @@ services:
       - "--chromium-allow-list=file:///tmp/.*"
 
   paperless-tika:
-    image: ghcr.io/paperless-ngx/tika:latest
+    image: docker.io/apache/tika:latest
     container_name: paperless-tika
     restart: unless-stopped
 
@@ -73,6 +73,7 @@ services:
     environment:
       PAPERLESS_REDIS: redis://paperless-broker:6379
       PAPERLESS_DBHOST: paperless-db
+      PAPERLESS_DBPASS: "{{ vault_paperless_db_password }}"
       PAPERLESS_DBENGINE: postgresql
       PAPERLESS_TIKA_ENABLED: 1
       PAPERLESS_TIKA_GOTENBERG_ENDPOINT: http://paperless-gotenberg:3000

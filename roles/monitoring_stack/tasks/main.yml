@@ -34,6 +34,12 @@
     dest: /opt/monitoring_stack/prometheus/prometheus.yml
     mode: "0644"
 
+- name: Template pve_exporter config
+  ansible.builtin.template:
+    src: pve.yml.j2
+    dest: /opt/monitoring_stack/pve_exporter/pve.yml
+    mode: "0644"
+
 - name: Start monitoring_stack
   community.docker.docker_compose_v2:
     project_src: /opt/monitoring_stack

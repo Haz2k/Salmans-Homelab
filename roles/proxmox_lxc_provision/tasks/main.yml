@@ -6,19 +6,29 @@
 # for the collection). Docs:
 # https://docs.ansible.com/ansible/latest/collections/community/general/proxmox_module.html
 
+- name: Ensure proxmoxer Python library is installed (required by the module)
+  ansible.builtin.apt:
+    name: python3-proxmoxer
+    state: present
+
 - name: Create LXC containers for each service stack
-  community.general.proxmox:
+  community.proxmox.proxmox:
     api_user: "{{ vault_proxmox_api_user }}"
     api_token_id: "{{ vault_proxmox_api_token_id }}"
     api_token_secret: "{{ vault_proxmox_api_token_secret }}"
     api_host: "{{ vault_proxmox_api_host }}"
+    validate_certs: false
     node: "{{ item.value.node }}"
     vmid: "{{ item.value.ctid }}"
-    hostname: "{{ item.key }}"
+    hostname: "{{ item.key | replace('_', '-') }}"
     ostemplate: "local:vztmpl/debian-12-standard_12.12-1_amd64.tar.zst"
+    storage: local-lvm
+    cmode: shell
+    features: nesting=1
     cores: "{{ item.value.cores }}"
+    disk: "{{ item.value.disk | default('20G') }}"
     memory: "{{ item.value.memory }}"
-    net:
+    netif:
       net0: "name=eth0,bridge=vmbr0,ip={{ item.value.ip }}/24,gw=192.168.0.1"
     unprivileged: true
     state: present

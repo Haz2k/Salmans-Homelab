@@ -24,6 +24,9 @@ services:
     container_name: grafana
     environment:
       GF_SECURITY_ADMIN_PASSWORD: "{{ vault_grafana_admin_password }}"
+      GF_AUTH_DISABLE_LOGIN_FORM: "true"
+      GF_AUTH_ANONYMOUS_ENABLED: "true"
+      GF_AUTH_ANONYMOUS_ORG_ROLE: "Admin"
     volumes:
       - /opt/monitoring_stack/grafana:/var/lib/grafana
     ports:
@@ -73,8 +76,6 @@ services:
       - /run/udev:/run/udev:ro
       - /opt/monitoring_stack/scrutiny/config:/opt/scrutiny/config
       - /opt/monitoring_stack/scrutiny/influxdb:/opt/scrutiny/influxdb
-    devices:
-      - "/dev/sda:/dev/sda"   # TODO: confirm real device paths per node
     ports:
       - "8082:8080"
     restart: unless-stopped

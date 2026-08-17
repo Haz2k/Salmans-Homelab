@@ -16,56 +16,56 @@
     - security_baseline
 
 - name: Provision LXC containers on the Proxmox nodes
-  hosts: proxmox_nodes
+  hosts: pve1
   become: true
   tags: [init, provision]
   roles:
     - proxmox_lxc_provision
 
 - name: Install Docker on the app-hosting LXCs
-  hosts: proxmox_nodes
+  hosts: lxc_hosts:localhost
   become: true
   tags: [init, docker]
   roles:
     - docker
 
 - name: Deploy Pi-hole (standalone, not in a Docker stack)
-  hosts: proxmox_nodes
+  hosts: pihole
   become: true
   tags: [pihole]
   roles:
     - pihole
 
 - name: Deploy Traefik (reverse proxy)
-  hosts: proxmox_nodes
+  hosts: core_stack
   become: true
   tags: [core_stack, traefik]
   roles:
     - traefik
 
 - name: Deploy core stack (Authelia, Vaultwarden, DuckDNS)
-  hosts: proxmox_nodes
+  hosts: core_stack
   become: true
   tags: [core_stack]
   roles:
     - core_stack
 
 - name: Deploy media stack (Jellyfin, *arr, qBittorrent, Gluetun)
-  hosts: proxmox_nodes
+  hosts: media_stack
   become: true
   tags: [media_stack]
   roles:
     - media_stack
 
 - name: Deploy monitoring stack (Prometheus, Grafana, Scrutiny, Uptime Kuma)
-  hosts: proxmox_nodes
+  hosts: monitoring_stack
   become: true
   tags: [monitoring_stack]
   roles:
     - monitoring_stack
 
 - name: Deploy automation stack (Home Assistant, Ollama, Paperless-NGX)
-  hosts: proxmox_nodes
+  hosts: automation_stack
   become: true
   tags: [automation_stack]
   roles:
@@ -79,7 +79,8 @@
     - zfs_alerts
 
 - name: Deploy Semaphore (safe automated updates)
-  hosts: proxmox_nodes
+  hosts: localhost
+  connection: local
   become: true
   tags: [init, semaphore]
   roles:

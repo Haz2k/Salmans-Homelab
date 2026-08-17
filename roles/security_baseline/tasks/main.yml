@@ -12,7 +12,7 @@
   vars:
     sshd_PasswordAuthentication: "no"
     sshd_PermitRootLogin: "no"
-    sshd_AllowUsers: "ansible"
+    sshd_AllowUsers: "{{ ansible_user }}"
 
 - name: Apply base OS security (fail2ban, auto-updates, etc.)
   ansible.builtin.import_role:
