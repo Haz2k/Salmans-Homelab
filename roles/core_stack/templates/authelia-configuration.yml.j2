@@ -10,11 +10,9 @@ log:
 totp:
   issuer: "{{ vault_domain }}"
 
-identity_validation:
-  reset_password:
-    disable: true
-
 authentication_backend:
+  password_reset:
+    disable: true
   file:
     path: /config/users_database.yml
 
