@@ -2,8 +2,8 @@
 # proxmox_lxc_provision
 #
 # Creates one LXC per entry in group_vars/all.yml -> lxc_services, using
-# the official community.general.proxmox module (see requirements.yml
-# for the collection). Docs:
+# the community.proxmox.proxmox module (see requirements.yml for the
+# collection). Docs:
 # https://docs.ansible.com/ansible/latest/collections/community/general/proxmox_module.html
 
 - name: Ensure proxmoxer Python library is installed (required by the module)
@@ -35,6 +35,20 @@
   loop: "{{ lxc_services | dict2items }}"
   loop_control:
     label: "{{ item.key }}"
+
+- name: Add TUN cgroup + mount entries for media_stack LXC (Gluetun requires /dev/net/tun)
+  ansible.builtin.lineinfile:
+    path: "/etc/pve/lxc/{{ lxc_services.media_stack.ctid }}.conf"
+    line: "{{ item }}"
+    create: false
+  loop:
+    - "lxc.cgroup2.devices.allow: c 10:200 rwm"
+    - "lxc.mount.entry: /dev/net/tun dev/net/tun none bind,create=file"
+  register: tun_conf_result
+
+- name: Reboot media_stack LXC if TUN config changed
+  ansible.builtin.command: "pct reboot {{ lxc_services.media_stack.ctid }}"
+  when: tun_conf_result.results | selectattr('changed') | list | length > 0
 
 # NOTE: API token vars (vault_proxmox_api_*) live in group_vars/all/vault.yml,
 # encrypted with Ansible Vault. Create the token in Proxmox first:
