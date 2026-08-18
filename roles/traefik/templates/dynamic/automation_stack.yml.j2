@@ -1,0 +1,29 @@
+# Static routes for automation_stack — separate LXC from Traefik.
+# Home Assistant uses network_mode: host, so its port is directly on the
+# LXC's IP with no Docker port-mapping translation needed.
+http:
+  routers:
+    homeassistant:
+      rule: "Host(`ha.{{ vault_domain }}`)"
+      entrypoints:
+        - websecure
+      service: homeassistant
+      tls:
+        certResolver: letsencrypt
+    paperless:
+      rule: "Host(`paperless.{{ vault_domain }}`)"
+      entrypoints:
+        - websecure
+      service: paperless
+      tls:
+        certResolver: letsencrypt
+
+  services:
+    homeassistant:
+      loadBalancer:
+        servers:
+          - url: "http://{{ lxc_services.automation_stack.ip }}:8123"
+    paperless:
+      loadBalancer:
+        servers:
+          - url: "http://{{ lxc_services.automation_stack.ip }}:8000"

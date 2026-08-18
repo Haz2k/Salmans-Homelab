@@ -36,6 +36,18 @@
     dest: /opt/traefik/dynamic/media_stack.yml
     mode: "0644"
 
+- name: Template dynamic config for monitoring_stack routing
+  ansible.builtin.template:
+    src: dynamic/monitoring_stack.yml.j2
+    dest: /opt/traefik/dynamic/monitoring_stack.yml
+    mode: "0644"
+
+- name: Template dynamic config for automation_stack routing
+  ansible.builtin.template:
+    src: dynamic/automation_stack.yml.j2
+    dest: /opt/traefik/dynamic/automation_stack.yml
+    mode: "0644"
+
 - name: Template docker-compose.yml
   ansible.builtin.template:
     src: docker-compose.yml.j2
