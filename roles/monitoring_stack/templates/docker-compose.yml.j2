@@ -7,7 +7,7 @@
 #   Scrutiny:     https://github.com/AnalogJ/scrutiny#docker-compose-recommended
 #   Uptime Kuma:  https://github.com/louislam/uptime-kuma/wiki/%F0%9F%94%A7-How-to-Install
 #   Speedtest Tracker: https://docs.speedtest-tracker.dev/getting-started/installation
-
+#   Homepage:     https://gethomepage.dev/installation/docker/
 services:
   prometheus:
     image: prom/prometheus:latest
@@ -18,7 +18,6 @@ services:
     ports:
       - "9090:9090"
     restart: unless-stopped
-
   grafana:
     image: grafana/grafana:latest
     container_name: grafana
@@ -32,7 +31,6 @@ services:
     ports:
       - "3000:3000"
     restart: unless-stopped
-
   node_exporter:
     image: prom/node-exporter:latest
     container_name: node_exporter
@@ -44,7 +42,6 @@ services:
     ports:
       - "9100:9100"
     restart: unless-stopped
-
   pve_exporter:
     image: prompve/prometheus-pve-exporter:latest
     container_name: pve_exporter
@@ -53,7 +50,6 @@ services:
     ports:
       - "9221:9221"
     restart: unless-stopped
-
   cadvisor:
     image: gcr.io/cadvisor/cadvisor:latest
     container_name: cadvisor
@@ -65,7 +61,6 @@ services:
     ports:
       - "8085:8080"
     restart: unless-stopped
-
   scrutiny:
     image: ghcr.io/analogj/scrutiny:latest
     container_name: scrutiny
@@ -79,7 +74,6 @@ services:
     ports:
       - "8082:8080"
     restart: unless-stopped
-
   uptime_kuma:
     image: louislam/uptime-kuma:latest
     container_name: uptime_kuma
@@ -88,7 +82,6 @@ services:
     ports:
       - "3001:3001"
     restart: unless-stopped
-
   speedtest_tracker:
     image: lscr.io/linuxserver/speedtest-tracker:latest
     container_name: speedtest_tracker
@@ -101,4 +94,15 @@ services:
       - /opt/monitoring_stack/speedtest_tracker:/config
     ports:
       - "8765:80"
+    restart: unless-stopped
+  homepage:
+    image: ghcr.io/gethomepage/homepage:latest
+    container_name: homepage
+    environment:
+      TZ: "{{ vault_timezone }}"
+      HOMEPAGE_ALLOWED_HOSTS: "homepage.{{ vault_domain }}"
+    volumes:
+      - /opt/monitoring_stack/homepage:/app/config
+    ports:
+      - "3003:3000"
     restart: unless-stopped
