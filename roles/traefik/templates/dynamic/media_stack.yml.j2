@@ -1,5 +1,7 @@
 # Static routes for media_stack — a separate LXC from Traefik, so Docker-label
 # discovery doesn't apply here. Points directly at the media_stack LXC IP.
+# All routes gated behind Authelia SSO (forwardauth middleware defined as a
+# Docker label on the authelia container in core_stack).
 http:
   routers:
     jellyfin:
@@ -7,6 +9,8 @@ http:
       entrypoints:
         - websecure
       service: jellyfin
+      middlewares:
+        - authelia@docker
       tls:
         certResolver: letsencrypt
     sonarr:
@@ -14,6 +18,8 @@ http:
       entrypoints:
         - websecure
       service: sonarr
+      middlewares:
+        - authelia@docker
       tls:
         certResolver: letsencrypt
     radarr:
@@ -21,6 +27,8 @@ http:
       entrypoints:
         - websecure
       service: radarr
+      middlewares:
+        - authelia@docker
       tls:
         certResolver: letsencrypt
     prowlarr:
@@ -28,6 +36,8 @@ http:
       entrypoints:
         - websecure
       service: prowlarr
+      middlewares:
+        - authelia@docker
       tls:
         certResolver: letsencrypt
     jellyseerr:
@@ -35,6 +45,8 @@ http:
       entrypoints:
         - websecure
       service: jellyseerr
+      middlewares:
+        - authelia@docker
       tls:
         certResolver: letsencrypt
     maintainerr:
@@ -42,6 +54,8 @@ http:
       entrypoints:
         - websecure
       service: maintainerr
+      middlewares:
+        - authelia@docker
       tls:
         certResolver: letsencrypt
     qbittorrent:
@@ -49,6 +63,8 @@ http:
       entrypoints:
         - websecure
       service: qbittorrent
+      middlewares:
+        - authelia@docker
       tls:
         certResolver: letsencrypt
 

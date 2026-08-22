@@ -1,0 +1,75 @@
+---
+- Media:
+    - Jellyfin:
+        href: https://media.{{ vault_domain }}
+        icon: jellyfin.png
+    - Sonarr:
+        href: https://sonarr.{{ vault_domain }}
+        icon: sonarr.png
+    - Radarr:
+        href: https://radarr.{{ vault_domain }}
+        icon: radarr.png
+    - Prowlarr:
+        href: https://prowlarr.{{ vault_domain }}
+        icon: prowlarr.png
+    - Jellyseerr:
+        href: https://requests.{{ vault_domain }}
+        icon: jellyseerr.png
+    - Maintainerr:
+        href: https://maintainerr.{{ vault_domain }}
+        icon: maintainerr.png
+    - qBittorrent:
+        href: https://qbit.{{ vault_domain }}
+        icon: qbittorrent.png
+
+- Core:
+    - Vaultwarden:
+        href: https://vault.{{ vault_domain }}
+        icon: vaultwarden.png
+    - Authelia:
+        href: https://auth.{{ vault_domain }}
+        icon: authelia.png
+
+- Automation:
+    - Home Assistant:
+        href: https://ha.{{ vault_domain }}
+        icon: home-assistant.png
+    - Paperless-ngx:
+        href: https://paperless.{{ vault_domain }}
+        icon: paperless-ngx.png
+
+- Monitoring:
+    - Grafana:
+        href: https://grafana.{{ vault_domain }}
+        icon: grafana.png
+    - Prometheus:
+        href: https://prometheus.{{ vault_domain }}
+        icon: prometheus.png
+    - cAdvisor:
+        href: https://cadvisor.{{ vault_domain }}
+        icon: cadvisor.png
+    - Scrutiny:
+        href: https://scrutiny.{{ vault_domain }}
+        icon: scrutiny.png
+    - Uptime Kuma:
+        href: https://uptime.{{ vault_domain }}
+        icon: uptime-kuma.png
+    - Speedtest Tracker:
+        href: https://speedtest.{{ vault_domain }}
+        icon: speedtest-tracker.png
+
+# Kept LAN/Tailscale-only intentionally (not routed through public Traefik) —
+# infra control-plane apps, higher-value targets if exposed publicly.
+- Infrastructure (LAN only):
+    - Semaphore:
+        href: http://{{ lxc_services.ansible_control.ip }}:3000
+        icon: semaphore.png
+    - Pi-hole:
+        href: http://{{ lxc_services.pihole.ip }}:8081/admin
+        icon: pi-hole.png
+    - Proxmox (pve1):
+        href: https://192.168.0.100:8006
+        icon: proxmox.png
+    - Proxmox (pve2):
+        href: https://192.168.0.150:8006
+        icon: proxmox.png

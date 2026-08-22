@@ -1,6 +1,5 @@
 # Static routes for automation_stack — separate LXC from Traefik.
-# Home Assistant uses network_mode: host, so its port is directly on the
-# LXC's IP with no Docker port-mapping translation needed.
+# All routes gated behind Authelia SSO.
 http:
   routers:
     homeassistant:
@@ -8,6 +7,8 @@ http:
       entrypoints:
         - websecure
       service: homeassistant
+      middlewares:
+        - authelia@docker
       tls:
         certResolver: letsencrypt
     paperless:
@@ -15,6 +16,8 @@ http:
       entrypoints:
         - websecure
       service: paperless
+      middlewares:
+        - authelia@docker
       tls:
         certResolver: letsencrypt
 

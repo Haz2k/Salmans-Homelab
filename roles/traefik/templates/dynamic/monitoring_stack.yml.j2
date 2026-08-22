@@ -1,0 +1,97 @@
+# Static routes for monitoring_stack — separate LXC from Traefik.
+# All routes gated behind Authelia SSO.
+http:
+  routers:
+    grafana:
+      rule: "Host(`grafana.{{ vault_domain }}`)"
+      entrypoints:
+        - websecure
+      service: grafana
+      middlewares:
+        - authelia@docker
+      tls:
+        certResolver: letsencrypt
+    homepage:
+      rule: "Host(`homepage.{{ vault_domain }}`)"
+      entrypoints:
+        - websecure
+      service: homepage
+      middlewares:
+        - authelia@docker
+      tls:
+        certResolver: letsencrypt
+    prometheus:
+      rule: "Host(`prometheus.{{ vault_domain }}`)"
+      entrypoints:
+        - websecure
+      service: prometheus
+      middlewares:
+        - authelia@docker
+      tls:
+        certResolver: letsencrypt
+    cadvisor:
+      rule: "Host(`cadvisor.{{ vault_domain }}`)"
+      entrypoints:
+        - websecure
+      service: cadvisor
+      middlewares:
+        - authelia@docker
+      tls:
+        certResolver: letsencrypt
+    scrutiny:
+      rule: "Host(`scrutiny.{{ vault_domain }}`)"
+      entrypoints:
+        - websecure
+      service: scrutiny
+      middlewares:
+        - authelia@docker
+      tls:
+        certResolver: letsencrypt
+    uptime_kuma:
+      rule: "Host(`uptime.{{ vault_domain }}`)"
+      entrypoints:
+        - websecure
+      service: uptime_kuma
+      middlewares:
+        - authelia@docker
+      tls:
+        certResolver: letsencrypt
+    speedtest_tracker:
+      rule: "Host(`speedtest.{{ vault_domain }}`)"
+      entrypoints:
+        - websecure
+      service: speedtest_tracker
+      middlewares:
+        - authelia@docker
+      tls:
+        certResolver: letsencrypt
+
+  services:
+    grafana:
+      loadBalancer:
+        servers:
+          - url: "http://{{ lxc_services.monitoring_stack.ip }}:3000"
+    prometheus:
+      loadBalancer:
+        servers:
+          - url: "http://{{ lxc_services.monitoring_stack.ip }}:9090"
+    cadvisor:
+      loadBalancer:
+        servers:
+          - url: "http://{{ lxc_services.monitoring_stack.ip }}:8085"
+    scrutiny:
+      loadBalancer:
+        servers:
+          - url: "http://{{ lxc_services.monitoring_stack.ip }}:8082"
+    uptime_kuma:
+      loadBalancer:
+        servers:
+          - url: "http://{{ lxc_services.monitoring_stack.ip }}:3001"
+    speedtest_tracker:
+      loadBalancer:
+        servers:
+          - url: "http://{{ lxc_services.monitoring_stack.ip }}:8765"
+    homepage:
+      loadBalancer:
+        servers:
+          - url: "http://{{ lxc_services.monitoring_stack.ip }}:3003"

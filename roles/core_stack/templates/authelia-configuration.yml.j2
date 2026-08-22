@@ -1,38 +1,35 @@
 # Source: https://www.authelia.com/configuration/methods/files/
 theme: dark
-
 server:
   address: 'tcp://:9091'
-
 log:
   level: info
-
 totp:
   issuer: "{{ vault_domain }}"
-
 authentication_backend:
   password_reset:
     disable: true
   file:
     path: /config/users_database.yml
-
 access_control:
   default_policy: deny
   rules:
     - domain: "*.{{ vault_domain }}"
       policy: two_factor
-
 session:
   secret: "{{ vault_authelia_session_secret }}"
   cookies:
     - domain: "{{ vault_domain }}"
       authelia_url: "https://auth.{{ vault_domain }}"
-
 storage:
   encryption_key: "{{ vault_authelia_storage_encryption_key }}"
   local:
     path: /config/db.sqlite3
-
 notifier:
-  filesystem:
-    filename: /config/notification.txt
+  smtp:
+    address: "smtp://smtp.gmail.com:587"
+    username: "{{ vault_authelia_admin_email }}"
+    password: "{{ vault_authelia_smtp_password }}"
+    sender: "{{ vault_authelia_admin_email }}"
+    subject: "[Authelia] {title}"
+    startup_check_address: "{{ vault_authelia_admin_email }}"

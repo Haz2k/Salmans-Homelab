@@ -1,6 +1,6 @@
 ---
 # monitoring_stack — Prometheus, Grafana, node_exporter, pve_exporter,
-# cadvisor, Scrutiny, Uptime Kuma, Speedtest Tracker.
+# cadvisor, Scrutiny, Uptime Kuma, Speedtest Tracker, Homepage.
 #
 # Sourcing:
 #   Prometheus:  https://prometheus.io/docs/prometheus/latest/installation/
@@ -12,6 +12,7 @@
 #   Uptime Kuma: https://github.com/louislam/uptime-kuma (Docker section
 #                in README)
 #   Speedtest Tracker: https://docs.speedtest-tracker.dev/getting-started/installation
+#   Homepage:    https://gethomepage.dev/installation/docker/
 
 - name: Create monitoring_stack directories
   ansible.builtin.file:
@@ -24,6 +25,7 @@
     - /opt/monitoring_stack/prometheus/data
     - /opt/monitoring_stack/grafana
     - /opt/monitoring_stack/pve_exporter
+    - /opt/monitoring_stack/homepage
 
 # Grafana (UID/GID 472) and Prometheus (UID/GID 65534 = nobody) run as
 # non-root inside their containers and can't write to bind-mounted host
@@ -59,6 +61,18 @@
   ansible.builtin.template:
     src: pve.yml.j2
     dest: /opt/monitoring_stack/pve_exporter/pve.yml
+    mode: "0644"
+
+- name: Template Homepage services.yaml
+  ansible.builtin.template:
+    src: homepage-services.yaml.j2
+    dest: /opt/monitoring_stack/homepage/services.yaml
+    mode: "0644"
+
+- name: Template Homepage settings.yaml
+  ansible.builtin.template:
+    src: homepage-settings.yaml.j2
+    dest: /opt/monitoring_stack/homepage/settings.yaml
     mode: "0644"
 
 - name: Start monitoring_stack
