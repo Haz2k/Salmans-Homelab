@@ -92,6 +92,17 @@
     - { id: 15798, name: "docker-monitoring-cadvisor" }
     - { id: 3662, name: "prometheus-2-0-overview" }
 
+- name: Fix datasource placeholders in downloaded dashboards (resolve ${DS_*} to our fixed Prometheus uid)
+  ansible.builtin.replace:
+    path: "/opt/monitoring_stack/grafana-dashboards/{{ item }}"
+    regexp: '\$\{DS_[^}]*\}'
+    replace: "prometheus"
+  loop:
+    - "node-exporter-full.json"
+    - "proxmox-via-prometheus.json"
+    - "docker-monitoring-cadvisor.json"
+    - "prometheus-2-0-overview.json"
+
 - name: Template Homepage services.yaml
   ansible.builtin.template:
     src: homepage-services.yaml.j2

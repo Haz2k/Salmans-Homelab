@@ -1,10 +1,14 @@
 # Auto-provisions Prometheus as Grafana's datasource — no manual UI setup needed.
+# Fixed uid so downloaded community dashboards can be relinked to it via
+# find/replace on their ${DS_*} placeholders (which normally only resolve
+# through Grafana's interactive Import wizard, not file-based provisioning).
 # Source: https://grafana.com/docs/grafana/latest/administration/provisioning/#datasources
 apiVersion: 1
 
 datasources:
   - name: Prometheus
     type: prometheus
+    uid: prometheus
     access: proxy
     url: http://prometheus:9090
     isDefault: true
