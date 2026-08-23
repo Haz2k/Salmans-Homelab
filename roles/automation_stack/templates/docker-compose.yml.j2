@@ -80,3 +80,4 @@ services:
       PAPERLESS_TIKA_ENDPOINT: http://paperless-tika:9998
       PAPERLESS_SECRET_KEY: "{{ vault_paperless_secret_key }}"
       PAPERLESS_TIME_ZONE: "{{ vault_timezone }}"
+      PAPERLESS_URL: "https://paperless.{{ vault_domain }}"
