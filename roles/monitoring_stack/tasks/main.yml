@@ -13,6 +13,7 @@
 #                in README)
 #   Speedtest Tracker: https://docs.speedtest-tracker.dev/getting-started/installation
 #   Homepage:    https://gethomepage.dev/installation/docker/
+#   Grafana provisioning: https://grafana.com/docs/grafana/latest/administration/provisioning/
 
 - name: Create monitoring_stack directories
   ansible.builtin.file:
@@ -24,6 +25,9 @@
     - /opt/monitoring_stack/prometheus
     - /opt/monitoring_stack/prometheus/data
     - /opt/monitoring_stack/grafana
+    - /opt/monitoring_stack/grafana-provisioning/datasources
+    - /opt/monitoring_stack/grafana-provisioning/dashboards
+    - /opt/monitoring_stack/grafana-dashboards
     - /opt/monitoring_stack/pve_exporter
     - /opt/monitoring_stack/homepage
 
@@ -62,6 +66,31 @@
     src: pve.yml.j2
     dest: /opt/monitoring_stack/pve_exporter/pve.yml
     mode: "0644"
+
+- name: Template Grafana datasource provisioning
+  ansible.builtin.template:
+    src: grafana-datasource.yml.j2
+    dest: /opt/monitoring_stack/grafana-provisioning/datasources/datasource.yml
+    mode: "0644"
+
+- name: Template Grafana dashboard provider config
+  ansible.builtin.template:
+    src: grafana-dashboard-provider.yml.j2
+    dest: /opt/monitoring_stack/grafana-provisioning/dashboards/provider.yml
+    mode: "0644"
+
+# Download well-known community dashboards directly by ID from grafana.com,
+# so real dashboards exist on first boot with no manual import required.
+- name: Download Grafana community dashboards
+  ansible.builtin.get_url:
+    url: "https://grafana.com/api/dashboards/{{ item.id }}/revisions/latest/download"
+    dest: "/opt/monitoring_stack/grafana-dashboards/{{ item.name }}.json"
+    mode: "0644"
+  loop:
+    - { id: 1860, name: "node-exporter-full" }
+    - { id: 10347, name: "proxmox-via-prometheus" }
+    - { id: 15798, name: "docker-monitoring-cadvisor" }
+    - { id: 3662, name: "prometheus-2-0-overview" }
 
 - name: Template Homepage services.yaml
   ansible.builtin.template:

@@ -28,6 +28,8 @@ services:
       GF_AUTH_ANONYMOUS_ORG_ROLE: "Admin"
     volumes:
       - /opt/monitoring_stack/grafana:/var/lib/grafana
+      - /opt/monitoring_stack/grafana-provisioning:/etc/grafana/provisioning
+      - /opt/monitoring_stack/grafana-dashboards:/var/lib/grafana/dashboards
     ports:
       - "3000:3000"
     restart: unless-stopped
