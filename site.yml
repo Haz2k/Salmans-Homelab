@@ -79,8 +79,7 @@
     - zfs_alerts
 
 - name: Deploy Semaphore (safe automated updates)
-  hosts: localhost
-  connection: local
+  hosts: ansible_control
   become: true
   tags: [init, semaphore]
   roles:
