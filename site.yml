@@ -23,7 +23,7 @@
     - proxmox_lxc_provision
 
 - name: Install Docker on the app-hosting LXCs
-  hosts: lxc_hosts:localhost
+  hosts: lxc_hosts
   become: true
   tags: [init, docker]
   roles:
