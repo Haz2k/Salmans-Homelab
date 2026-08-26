@@ -28,6 +28,12 @@ services:
       DOMAIN: "https://vault.{{ vault_domain }}"
       SIGNUPS_ALLOWED: "false"
       ADMIN_TOKEN: "{{ vault_vaultwarden_admin_token }}"
+      SMTP_HOST: "smtp.gmail.com"
+      SMTP_PORT: "587"
+      SMTP_SECURITY: "starttls"
+      SMTP_USERNAME: "{{ vault_authelia_admin_email }}"
+      SMTP_PASSWORD: "{{ vault_authelia_smtp_password }}"
+      SMTP_FROM: "{{ vault_authelia_admin_email }}"
     volumes:
       - /opt/core_stack/vaultwarden:/data
     labels:
