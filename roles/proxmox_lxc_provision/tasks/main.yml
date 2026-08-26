@@ -5,6 +5,13 @@
 # the community.proxmox.proxmox module (see requirements.yml for the
 # collection). Docs:
 # https://docs.ansible.com/ansible/latest/collections/community/general/proxmox_module.html
+#
+# NOTE: LXC creation specifically requires a root@pam API token — Proxmox
+# hardcodes a restriction (in PVE::Storage.pm) blocking any non-root@pam
+# token from passing a filesystem path via `ostemplate`, regardless of the
+# permissions granted to that token. This is unrelated to Privilege
+# Separation or any ACL config; it cannot be worked around with a scoped
+# user. All other roles/tasks continue to use the scoped ansible@pve token.
 
 - name: Ensure proxmoxer Python library is installed (required by the module)
   ansible.builtin.apt:
@@ -13,9 +20,9 @@
 
 - name: Create LXC containers for each service stack
   community.proxmox.proxmox:
-    api_user: "{{ vault_proxmox_api_user }}"
-    api_token_id: "{{ vault_proxmox_api_token_id }}"
-    api_token_secret: "{{ vault_proxmox_api_token_secret }}"
+    api_user: "{{ vault_proxmox_root_api_user }}"
+    api_token_id: "{{ vault_proxmox_root_api_token_id }}"
+    api_token_secret: "{{ vault_proxmox_root_api_token_secret }}"
     api_host: "{{ vault_proxmox_api_host }}"
     validate_certs: false
     node: "{{ item.value.node }}"
@@ -32,6 +39,7 @@
       net0: "name=eth0,bridge=vmbr0,ip={{ item.value.ip }}/24,gw=192.168.0.1"
     unprivileged: true
     state: present
+    update: false
   loop: "{{ lxc_services | dict2items }}"
   loop_control:
     label: "{{ item.key }}"
@@ -51,6 +59,7 @@
   delegate_to: "{{ lxc_services.media_stack.node }}"
   when: tun_conf_result.results | selectattr('changed') | list | length > 0
 
-# NOTE: API token vars (vault_proxmox_api_*) live in group_vars/all/vault.yml,
-# encrypted with Ansible Vault. Create the token in Proxmox first:
-# Datacenter -> Permissions -> API Tokens, scoped to what Ansible needs.
+# NOTE: Scoped API token vars (vault_proxmox_api_*) used by all other roles
+# (e.g. pve_exporter) live in group_vars/all/vault.yml, encrypted with
+# Ansible Vault. The elevated root@pam token (vault_proxmox_root_api_*) is
+# used ONLY here, for LXC creation, per the note above.
