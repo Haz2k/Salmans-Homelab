@@ -1,0 +1,78 @@
+---
+# update.yml
+#
+# Safe, automated container-update pipeline: backup -> pull+recreate ->
+# healthcheck -> auto-revert on failure. Separate from site.yml (which
+# applies declarative config state) since this specifically handles
+# routine image updates.
+#
+# Run via tags to target one stack at a time, e.g.:
+#   ansible-playbook update.yml --tags monitoring_stack
+#
+# NOTE: ansible_control (Semaphore itself) is deliberately NOT included
+# here. Running its update via Semaphore would mean Semaphore recreating
+# its own container mid-run, killing the process executing the update.
+# Update that stack manually from CT100 directly:
+#   ansible-playbook update.yml --tags ansible_control --vault-password-file .vault_pass
+# (task below exists but should only ever be run this way, never via
+# Semaphore's own task template)
+
+- name: Update pihole
+  hosts: pihole
+  become: true
+  tags: [pihole]
+  roles:
+    - role: container_update
+      vars:
+        update_stack_name: pihole
+        update_stack_dir: /opt/pihole
+
+- name: Update core_stack (Traefik, Authelia, Vaultwarden, DuckDNS)
+  hosts: core_stack
+  become: true
+  tags: [core_stack]
+  roles:
+    - role: container_update
+      vars:
+        update_stack_name: core_stack
+        update_stack_dir: /opt/core_stack
+
+- name: Update media_stack (Jellyfin, *arr, qBittorrent, Gluetun)
+  hosts: media_stack
+  become: true
+  tags: [media_stack]
+  roles:
+    - role: container_update
+      vars:
+        update_stack_name: media_stack
+        update_stack_dir: /opt/media_stack
+
+- name: Update monitoring_stack (Prometheus, Grafana, etc.)
+  hosts: monitoring_stack
+  become: true
+  tags: [monitoring_stack]
+  roles:
+    - role: container_update
+      vars:
+        update_stack_name: monitoring_stack
+        update_stack_dir: /opt/monitoring_stack
+
+- name: Update automation_stack (Home Assistant, Ollama, Paperless-NGX)
+  hosts: automation_stack
+  become: true
+  tags: [automation_stack]
+  roles:
+    - role: container_update
+      vars:
+        update_stack_name: automation_stack
+        update_stack_dir: /opt/automation_stack
+
+- name: Update ansible_control (Semaphore, Diun) — MANUAL RUN ONLY, see note above
+  hosts: ansible_control
+  become: true
+  tags: [ansible_control, never]
+  roles:
+    - role: container_update
+      vars:
+        update_stack_name: ansible_control
+        update_stack_dir: /opt/ansible_control

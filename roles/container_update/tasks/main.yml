@@ -1,0 +1,100 @@
+---
+# container_update
+#
+# Safe update pipeline for a single Docker Compose stack: backup config/data,
+# capture current image IDs, pull + recreate, healthcheck, and auto-revert
+# to the previous images if the healthcheck fails.
+#
+# Required vars:
+#   update_stack_name — short name, e.g. "monitoring_stack" (used for backup path)
+#   update_stack_dir   — full path to the stack's directory, e.g. "/opt/monitoring_stack"
+
+- name: Ensure backups directory exists
+  ansible.builtin.file:
+    path: "/opt/backups/{{ update_stack_name }}"
+    state: directory
+    mode: "0755"
+
+- name: Set backup timestamp
+  ansible.builtin.set_fact:
+    update_backup_ts: "{{ lookup('pipe', 'date +%Y%m%d-%H%M%S') }}"
+
+- name: Record current image references used by this stack
+  ansible.builtin.shell: |
+    cd {{ update_stack_dir }} && docker compose config --images
+  register: update_stack_images
+  changed_when: false
+
+- name: Record current image IDs for each image reference (for rollback)
+  ansible.builtin.shell: |
+    docker image inspect "{{ item }}" --format '{{ '{{' }}.Id{{ '}}' }}'
+  loop: "{{ update_stack_images.stdout_lines }}"
+  register: update_pre_image_ids
+  changed_when: false
+
+- name: Save pre-update image ID mapping to backup folder
+  ansible.builtin.copy:
+    content: |
+      {% for item in update_pre_image_ids.results %}
+      {{ item.item }} {{ item.stdout }}
+      {% endfor %}
+    dest: "/opt/backups/{{ update_stack_name }}/{{ update_backup_ts }}-image-ids.txt"
+    mode: "0644"
+
+- name: Prune old backups (keep last 5 of each)
+  ansible.builtin.shell: |
+    cd /opt/backups/{{ update_stack_name }} && ls -t *.tar.gz 2>/dev/null | tail -n +6 | xargs -r rm --
+    cd /opt/backups/{{ update_stack_name }} && ls -t *-image-ids.txt 2>/dev/null | tail -n +6 | xargs -r rm --
+  changed_when: true
+
+- name: Backup stack config/data directory
+  ansible.builtin.shell: |
+    tar czf /opt/backups/{{ update_stack_name }}/{{ update_backup_ts }}.tar.gz -C /opt {{ update_stack_name }}
+  changed_when: true
+
+- name: Pull latest images
+  ansible.builtin.shell: |
+    cd {{ update_stack_dir }} && docker compose pull
+  register: update_pull_result
+  changed_when: "'Downloaded newer image' in update_pull_result.stdout or 'Pulled' in update_pull_result.stdout"
+
+- name: Recreate containers with updated images
+  ansible.builtin.shell: |
+    cd {{ update_stack_dir }} && docker compose up -d
+  changed_when: true
+
+- name: Wait for containers to stabilize
+  ansible.builtin.pause:
+    seconds: 20
+
+- name: Check container health status
+  ansible.builtin.shell: |
+    cd {{ update_stack_dir }} && docker compose ps --format json
+  register: update_health_check
+  changed_when: false
+
+- name: Parse container statuses
+  ansible.builtin.set_fact:
+    update_unhealthy_containers: "{{ update_health_check.stdout_lines | map('from_json') | selectattr('State', 'in', ['restarting', 'exited']) | list }}"
+
+- name: Report healthcheck result
+  ansible.builtin.debug:
+    msg: "Healthcheck {{ 'FAILED' if update_unhealthy_containers | length > 0 else 'PASSED' }} for {{ update_stack_name }}: {{ update_unhealthy_containers | map(attribute='Service') | list }}"
+
+- name: Revert to previous images if healthcheck failed
+  when: update_unhealthy_containers | length > 0
+  block:
+    - name: Re-tag previous image IDs back onto their references
+      ansible.builtin.shell: |
+        docker tag "{{ item.stdout }}" "{{ item.item }}"
+      loop: "{{ update_pre_image_ids.results }}"
+      changed_when: true
+
+    - name: Recreate containers with reverted images
+      ansible.builtin.shell: |
+        cd {{ update_stack_dir }} && docker compose up -d --force-recreate
+      changed_when: true
+
+    - name: Fail the play to signal revert occurred
+      ansible.builtin.fail:
+        msg: "Update for {{ update_stack_name }} failed healthcheck and was automatically reverted to the previous images. Manual investigation needed."
