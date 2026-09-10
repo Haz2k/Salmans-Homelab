@@ -1,0 +1,831 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hifth Checklist — Salman Omar</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,500;0,600;0,700;1,500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --parchment: #F7F2E7;
+    --card: #FFFDF8;
+    --ink: #2A2620;
+    --ink-soft: #6B6255;
+    --green: #2F4A3C;
+    --green-deep: #1E3128;
+    --gold: #AD8A3F;
+    --gold-soft: #E4D6AE;
+    --line: #E3D9C2;
+    --line-soft: #EEE7D6;
+    --danger: #A2483B;
+    --danger-soft: #F1D9D3;
+    --weak: #B08424;
+    --weak-soft: #F0E1BC;
+    --pass-soft: #D9E4DA;
+    --radius: 10px;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--parchment);
+    color: var(--ink);
+    font-family: 'Inter', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    min-height: 100vh;
+  }
+
+  .wrap {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 28px 20px 90px;
+  }
+
+  header.top {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-bottom: 16px;
+    border-bottom: 1px solid var(--line);
+    padding-bottom: 18px;
+  }
+
+  .eyebrow-row {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  h1 {
+    font-family: 'Lora', serif;
+    font-weight: 700;
+    font-size: 26px;
+    color: var(--green-deep);
+    margin: 0;
+    letter-spacing: 0.2px;
+  }
+
+  .who {
+    font-family: 'Lora', serif;
+    font-style: italic;
+    font-size: 14px;
+    color: var(--gold);
+    white-space: nowrap;
+  }
+
+  .sub {
+    font-size: 13px;
+    color: var(--ink-soft);
+    margin-top: 2px;
+  }
+
+  .status-strip {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 11.5px;
+    color: var(--ink-soft);
+    margin: 14px 0 18px;
+  }
+  .status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--gold-soft);
+  }
+  .status-dot.ok { background: var(--green); }
+  .status-dot.err { background: var(--danger); }
+
+  .month-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin: 0 0 18px;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .month-nav {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .month-nav button {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 1px solid var(--line);
+    background: var(--card);
+    color: var(--green-deep);
+    font-size: 15px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s, border-color 0.15s;
+  }
+  .month-nav button:hover { background: var(--gold-soft); border-color: var(--gold); }
+  .month-nav button:disabled { opacity: 0.35; cursor: default; }
+  .month-nav button:disabled:hover { background: var(--card); border-color: var(--line); }
+
+  .month-label {
+    font-family: 'Lora', serif;
+    font-size: 17px;
+    font-weight: 600;
+    color: var(--ink);
+    min-width: 150px;
+    text-align: center;
+  }
+
+  .add-btn {
+    background: var(--green);
+    color: #fff;
+    border: none;
+    padding: 9px 16px;
+    border-radius: var(--radius);
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
+    transition: background 0.15s;
+  }
+  .add-btn:hover { background: var(--green-deep); }
+
+  /* ---- stats card ---- */
+  .stats-card {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 16px 18px 14px;
+    margin-bottom: 20px;
+  }
+  .stats-title {
+    font-family: 'Lora', serif;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--green-deep);
+    margin: 0 0 12px;
+  }
+  .chip-row {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 14px;
+    flex-wrap: wrap;
+  }
+  .chip {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12.5px;
+    color: var(--ink-soft);
+    background: #FBF8F0;
+    border: 1px solid var(--line-soft);
+    border-radius: 20px;
+    padding: 4px 11px 4px 8px;
+  }
+  .chip .swatch { width: 8px; height: 8px; border-radius: 50%; }
+  .chip b { color: var(--ink); font-size: 13px; }
+  .swatch.passed { background: var(--green); }
+  .swatch.weak { background: var(--weak); }
+  .swatch.failed { background: var(--danger); }
+
+  .chart-wrap { overflow-x: auto; }
+  .chart-empty {
+    font-size: 12.5px;
+    color: var(--ink-soft);
+    padding: 6px 0 2px;
+  }
+
+  /* ---- entry cards ---- */
+  .entries { display: flex; flex-direction: column; gap: 8px; }
+
+  .empty {
+    text-align: center;
+    padding: 44px 20px;
+    color: var(--ink-soft);
+    background: var(--card);
+    border: 1px dashed var(--line);
+    border-radius: var(--radius);
+  }
+  .empty p:first-child {
+    font-family: 'Lora', serif;
+    font-size: 16px;
+    color: var(--green-deep);
+    margin-bottom: 4px;
+  }
+
+  .entry-card {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 12px 14px;
+    cursor: pointer;
+    transition: border-color 0.12s, background 0.12s;
+  }
+  .entry-card:hover { border-color: var(--gold); background: #FBF8F0; }
+
+  .entry-date {
+    font-family: 'Lora', serif;
+    font-weight: 600;
+    font-size: 14.5px;
+    color: var(--green-deep);
+    min-width: 54px;
+  }
+
+  .entry-dots { display: flex; gap: 5px; }
+  .dot { width: 9px; height: 9px; border-radius: 50%; background: #E4DCC7; }
+  .dot.passed { background: var(--green); }
+  .dot.weak { background: var(--weak); }
+  .dot.failed { background: var(--danger); }
+
+  .entry-badge {
+    margin-left: auto;
+    font-size: 11.5px;
+    font-weight: 700;
+    letter-spacing: 0.2px;
+    padding: 4px 10px;
+    border-radius: 20px;
+    white-space: nowrap;
+  }
+  .badge-full { background: var(--pass-soft); color: var(--green-deep); }
+  .badge-partial { background: var(--weak-soft); color: var(--weak); }
+  .badge-none { background: var(--line-soft); color: var(--ink-soft); }
+
+  .entry-next {
+    font-size: 12px;
+    color: var(--ink-soft);
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    display: none;
+  }
+
+  .del-btn {
+    background: none;
+    border: none;
+    color: #C7BBA0;
+    cursor: pointer;
+    font-size: 15px;
+    line-height: 1;
+    padding: 4px;
+  }
+  .del-btn:hover { color: var(--danger); }
+
+  @media (min-width: 520px) {
+    .entry-next { display: block; }
+  }
+
+  footer.note {
+    margin-top: 18px;
+    font-size: 12px;
+    color: var(--ink-soft);
+    text-align: center;
+  }
+
+  .toast {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: var(--green-deep);
+    color: #F4EFE1;
+    padding: 9px 18px;
+    border-radius: 20px;
+    font-size: 13px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s, transform 0.2s;
+    z-index: 200;
+    max-width: 88vw;
+    text-align: center;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  .toast.err { background: var(--danger); }
+
+  .loading {
+    text-align: center;
+    padding: 60px 0;
+    color: var(--ink-soft);
+    font-size: 14px;
+  }
+
+  /* ---- modal ---- */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(30, 26, 20, 0.45);
+    display: none;
+    align-items: flex-end;
+    justify-content: center;
+    z-index: 100;
+  }
+  .modal-overlay.open { display: flex; }
+
+  .modal-card {
+    background: var(--parchment);
+    width: 100%;
+    max-width: 480px;
+    max-height: 88vh;
+    overflow-y: auto;
+    border-radius: 18px 18px 0 0;
+    box-shadow: 0 -6px 24px rgba(0,0,0,0.18);
+    animation: slideUp 0.22s ease-out;
+  }
+  @media (min-width: 560px) {
+    .modal-overlay { align-items: center; }
+    .modal-card { border-radius: 14px; max-height: 82vh; animation: fadeIn 0.18s ease-out; }
+  }
+  @keyframes slideUp { from { transform: translateY(24px); opacity: 0.6; } to { transform: translateY(0); opacity: 1; } }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+
+  .modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 18px 10px;
+    border-bottom: 1px solid var(--line);
+    position: sticky;
+    top: 0;
+    background: var(--parchment);
+    z-index: 2;
+  }
+  .modal-header h2 {
+    font-family: 'Lora', serif;
+    font-size: 17px;
+    font-weight: 600;
+    color: var(--green-deep);
+    margin: 0;
+  }
+  .modal-close {
+    background: none;
+    border: none;
+    font-size: 18px;
+    color: var(--ink-soft);
+    cursor: pointer;
+    padding: 4px;
+  }
+  .modal-close:hover { color: var(--danger); }
+
+  .modal-body { padding: 16px 18px 6px; }
+
+  .field-label {
+    font-size: 10.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--ink-soft);
+    margin-bottom: 6px;
+    display: block;
+  }
+
+  .date-field { margin-bottom: 18px; }
+  .date-field input {
+    border: 1px solid var(--line-soft);
+    background: #FCFAF3;
+    border-radius: 7px;
+    padding: 8px 10px;
+    font-family: 'Inter', sans-serif;
+    font-weight: 600;
+    color: var(--green-deep);
+    font-size: 14.5px;
+  }
+
+  .section-block { margin-bottom: 18px; }
+  .section-block .section-name {
+    font-family: 'Lora', serif;
+    font-weight: 600;
+    font-size: 14.5px;
+    color: var(--ink);
+    margin-bottom: 8px;
+  }
+
+  .status-group { display: flex; gap: 6px; margin-bottom: 8px; }
+  .status-btn {
+    flex: 1;
+    border: 1px solid var(--line);
+    background: #FCFAF3;
+    color: var(--ink-soft);
+    font-family: 'Inter', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 8px 4px;
+    border-radius: 7px;
+    cursor: pointer;
+    transition: background 0.12s, border-color 0.12s, color 0.12s;
+  }
+  .status-btn:hover { border-color: var(--gold); }
+  .status-btn.active.passed { background: var(--pass-soft); border-color: var(--green); color: var(--green-deep); }
+  .status-btn.active.failed { background: var(--danger-soft); border-color: var(--danger); color: var(--danger); }
+  .status-btn.active.weak   { background: var(--weak-soft); border-color: var(--weak); color: var(--weak); }
+
+  .next-label {
+    font-size: 9.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #B7AF9C;
+    display: block;
+    margin-bottom: 3px;
+  }
+  .box-input {
+    width: 100%;
+    border: 1px solid var(--line-soft);
+    background: #FCFAF3;
+    border-radius: 7px;
+    padding: 8px 10px;
+    font-family: 'Inter', sans-serif;
+    font-size: 13.5px;
+    color: var(--ink);
+  }
+  .box-input:focus { outline: 1px solid var(--gold); background: #fff; }
+  .box-input::placeholder { color: #C4BBA5; }
+  textarea.box-input { min-height: 64px; resize: vertical; line-height: 1.4; }
+
+  .modal-footer {
+    display: flex;
+    gap: 10px;
+    padding: 12px 18px 18px;
+    position: sticky;
+    bottom: 0;
+    background: var(--parchment);
+  }
+  .modal-footer .save-btn {
+    flex: 1;
+    background: var(--green);
+    color: #fff;
+    border: none;
+    padding: 12px;
+    border-radius: var(--radius);
+    font-size: 14.5px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+  .modal-footer .save-btn:hover { background: var(--green-deep); }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <header class="top">
+      <div class="eyebrow-row">
+        <h1>Hifth Checklist</h1>
+        <span class="who">Salman Omar</span>
+      </div>
+      <div class="sub">Daily memorization &amp; review tracker</div>
+    </header>
+
+    <div class="status-strip">
+      <span class="status-dot" id="statusDot"></span>
+      <span id="statusText">Connecting…</span>
+    </div>
+
+    <div class="month-bar">
+      <div class="month-nav">
+        <button id="prevBtn" aria-label="Previous month">‹</button>
+        <div class="month-label" id="monthLabel">—</div>
+        <button id="nextBtn" aria-label="Next month">›</button>
+      </div>
+      <button class="add-btn" id="addBtn">+ Add entry</button>
+    </div>
+
+    <div class="stats-card">
+      <p class="stats-title">This month at a glance</p>
+      <div class="chip-row" id="chipRow"></div>
+      <div class="chart-wrap" id="chartWrap"></div>
+    </div>
+
+    <div id="content"><div class="loading">Loading…</div></div>
+
+    <footer class="note">Synced live to your server — open this on any device on the same network to keep going.</footer>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <!-- Modal -->
+  <div class="modal-overlay" id="modalOverlay">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h2>Entry</h2>
+        <button class="modal-close" id="modalCloseBtn" aria-label="Close">✕</button>
+      </div>
+      <div class="modal-body" id="modalBody"></div>
+      <div class="modal-footer">
+        <button class="save-btn" id="modalSaveBtn">Save &amp; close</button>
+      </div>
+    </div>
+  </div>
+
+<script>
+const START_YEAR = 2026, START_MONTH = 9; // September 2026
+let year, month; // 1-12
+let entries = [];
+let allDataCache = null; // full dataset from the server, kept in sync locally
+let activeId = null;
+let activeIsNew = false;
+
+const SECTIONS = [
+  { key: 'new',    label: 'New' },
+  { key: 'wajh',   label: 'Wajh' },
+  { key: 'review', label: 'Review' }
+];
+
+const STATUSES = [
+  { value: 'passed', label: 'Passed' },
+  { value: 'failed', label: 'Failed' },
+  { value: 'weak',   label: 'Weak' }
+];
+
+const monthNames = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+
+function monthKey(y,m){ return `${y}-${String(m).padStart(2,'0')}`; }
+function uid(){ return 'e' + Date.now() + Math.random().toString(36).slice(2,7); }
+function esc(v){ return (v||'').replace(/"/g,'&quot;'); }
+
+function todayISOInMonth(y,m){
+  const now = new Date();
+  if (now.getFullYear() === y && now.getMonth()+1 === m) {
+    return now.toISOString().slice(0,10);
+  }
+  return `${y}-${String(m).padStart(2,'0')}-01`;
+}
+
+/* ---------- server API ---------- */
+function setStatus(state, text){
+  document.getElementById('statusDot').className = 'status-dot ' + (state||'');
+  document.getElementById('statusText').textContent = text;
+}
+
+async function fetchAllData(){
+  const res = await fetch('/api/data');
+  if (!res.ok) throw new Error('fetch failed');
+  return await res.json();
+}
+
+async function pushAllData(obj){
+  const res = await fetch('/api/data', {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(obj)
+  });
+  if (!res.ok) throw new Error('save failed');
+}
+
+async function loadMonth(y,m){
+  document.getElementById('content').innerHTML = '<div class="loading">Loading…</div>';
+  setStatus('', 'Connecting…');
+  try {
+    allDataCache = await fetchAllData();
+    entries = allDataCache[monthKey(y,m)] || [];
+    setStatus('ok', 'Synced');
+    render();
+  } catch (e) {
+    setStatus('err', "Can't reach the server — check the connection");
+    entries = [];
+    render();
+  }
+}
+
+async function saveMonth(){
+  if (!allDataCache) allDataCache = {};
+  allDataCache[monthKey(year,month)] = entries;
+  try {
+    await pushAllData(allDataCache);
+    setStatus('ok', 'Synced');
+    showToast('Saved');
+  } catch (e) {
+    setStatus('err', "Can't reach the server — not saved");
+    showToast('Could not save — check the connection', true);
+  }
+}
+
+function showToast(msg, isErr){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast show' + (isErr ? ' err' : '');
+  clearTimeout(showToast._t);
+  showToast._t = setTimeout(()=> t.classList.remove('show'), 1800);
+}
+
+function updateMonthLabel(){
+  document.getElementById('monthLabel').textContent = `${monthNames[month-1]} ${year}`;
+  document.getElementById('prevBtn').disabled = (year === START_YEAR && month === START_MONTH);
+}
+
+function passedCount(e){
+  return SECTIONS.filter(s => e[s.key+'Status'] === 'passed').length;
+}
+
+function fmtShort(iso){
+  if(!iso) return '—';
+  const [y,m,d] = iso.split('-');
+  return `${monthNames[parseInt(m,10)-1].slice(0,3)} ${parseInt(d,10)}`;
+}
+
+/* ---------- stats card ---------- */
+function renderStats(){
+  const chipRow = document.getElementById('chipRow');
+  const chartWrap = document.getElementById('chartWrap');
+
+  let passed=0, failed=0, weak=0;
+  entries.forEach(e => SECTIONS.forEach(s => {
+    const v = e[s.key+'Status'];
+    if (v === 'passed') passed++;
+    else if (v === 'failed') failed++;
+    else if (v === 'weak') weak++;
+  }));
+
+  chipRow.innerHTML = `
+    <div class="chip"><span class="swatch passed"></span>Passed <b>${passed}</b></div>
+    <div class="chip"><span class="swatch weak"></span>Weak <b>${weak}</b></div>
+    <div class="chip"><span class="swatch failed"></span>Failed <b>${failed}</b></div>
+  `;
+
+  // Only chart days where at least one section was actually marked —
+  // untouched sections are skipped rather than drawn as blank.
+  const sorted = [...entries]
+    .filter(e => SECTIONS.some(s => e[s.key+'Status']))
+    .sort((a,b)=> (a.date||'').localeCompare(b.date||''));
+
+  if (sorted.length === 0) {
+    chartWrap.innerHTML = '<div class="chart-empty">Mark Passed, Failed, or Weak on an entry to see your monthly chart.</div>';
+    return;
+  }
+
+  const barW = 22, gap = 10, chartH = 100, baseline = chartH + 14;
+  const totalW = sorted.length * (barW + gap) + gap;
+  const svgW = Math.max(totalW, 260);
+
+  let bars = '';
+  sorted.forEach((e, i) => {
+    const x = gap + i * (barW + gap);
+    const filled = SECTIONS.filter(s => e[s.key+'Status']);
+    const segH = chartH / filled.length;
+    let segsSvg = '';
+    filled.forEach((s, si) => {
+      const v = e[s.key+'Status'];
+      const color = v === 'passed' ? 'var(--green)' : v === 'weak' ? 'var(--weak)' : 'var(--danger)';
+      const y = baseline - segH*(si+1);
+      segsSvg += `<rect x="${x}" y="${y}" width="${barW}" height="${segH-2}" rx="2" fill="${color}"></rect>`;
+    });
+    const day = e.date ? parseInt(e.date.split('-')[2],10) : '';
+    bars += segsSvg + `<text x="${x + barW/2}" y="${baseline+14}" text-anchor="middle" font-size="9.5" fill="var(--ink-soft)" font-family="Inter, sans-serif">${day}</text>`;
+  });
+
+  chartWrap.innerHTML = `
+    <svg width="${svgW}" height="${baseline+22}" viewBox="0 0 ${svgW} ${baseline+22}">
+      ${bars}
+    </svg>
+  `;
+}
+
+/* ---------- entry list ---------- */
+function render(){
+  updateMonthLabel();
+  renderStats();
+  const content = document.getElementById('content');
+
+  if (entries.length === 0) {
+    content.innerHTML = `<div class="empty"><p>No entries yet</p><p>Tap "+ Add entry" to log ${monthNames[month-1]}.</p></div>`;
+    return;
+  }
+
+  const sorted = [...entries].sort((a,b)=> (a.date||'').localeCompare(b.date||''));
+
+  content.innerHTML = `<div class="entries">${sorted.map(e => entryCardHTML(e)).join('')}</div>`;
+
+  content.querySelectorAll('.entry-card').forEach(card=>{
+    card.addEventListener('click', (ev)=>{
+      if (ev.target.closest('.del-btn')) return;
+      openModal(card.dataset.id, false);
+    });
+    card.querySelector('.del-btn').addEventListener('click', (ev)=>{
+      ev.stopPropagation();
+      entries = entries.filter(x=>x.id!==card.dataset.id);
+      render();
+      saveMonth();
+    });
+  });
+}
+
+function entryCardHTML(e){
+  const pc = passedCount(e);
+  const badgeClass = pc===3 ? 'badge-full' : pc===0 ? 'badge-none' : 'badge-partial';
+  const dots = SECTIONS.map(s => `<span class="dot ${e[s.key+'Status']||''}" title="${s.label}"></span>`).join('');
+  const nextBits = SECTIONS.map(s => e[s.key+'Next']).filter(Boolean).join(' · ');
+  return `
+    <div class="entry-card" data-id="${e.id}">
+      <div class="entry-date">${fmtShort(e.date)}</div>
+      <div class="entry-dots">${dots}</div>
+      <div class="entry-next">${nextBits ? esc(nextBits) : ''}</div>
+      <div class="entry-badge ${badgeClass}">${pc}/3 passed</div>
+      <button class="del-btn" title="Remove entry">✕</button>
+    </div>
+  `;
+}
+
+/* ---------- modal ---------- */
+function openModal(id, isNew){
+  activeId = id;
+  activeIsNew = isNew;
+  const e = entries.find(x=>x.id===id);
+  if (!e) return;
+
+  const body = document.getElementById('modalBody');
+  body.innerHTML = `
+    <div class="date-field">
+      <span class="field-label">Date</span>
+      <input type="date" id="m_date" value="${e.date||''}">
+    </div>
+    ${SECTIONS.map(s => `
+      <div class="section-block">
+        <div class="section-name">${s.label}</div>
+        <div class="status-group" data-key="${s.key}">
+          ${STATUSES.map(st => `<button type="button" class="status-btn ${st.value} ${e[s.key+'Status']===st.value?'active':''}" data-value="${st.value}">${st.label}</button>`).join('')}
+        </div>
+        <span class="next-label">Next day</span>
+        <input type="text" class="box-input" id="m_${s.key}Next" value="${esc(e[s.key+'Next'])}" placeholder="What's next…">
+      </div>
+    `).join('')}
+    <div class="section-block">
+      <span class="field-label">Comments</span>
+      <textarea class="box-input" id="m_comments" placeholder="Notes…">${e.comments||''}</textarea>
+    </div>
+  `;
+
+  body.querySelector('#m_date').addEventListener('input', ev=>{ e.date = ev.target.value; });
+  SECTIONS.forEach(s=>{
+    body.querySelector('#m_'+s.key+'Next').addEventListener('input', ev=>{ e[s.key+'Next'] = ev.target.value; });
+  });
+  body.querySelector('#m_comments').addEventListener('input', ev=>{ e.comments = ev.target.value; });
+
+  body.querySelectorAll('.status-group').forEach(grp=>{
+    const key = grp.dataset.key;
+    grp.querySelectorAll('.status-btn').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        const val = btn.dataset.value;
+        e[key+'Status'] = (e[key+'Status'] === val) ? '' : val;
+        grp.querySelectorAll('.status-btn').forEach(b=> b.classList.toggle('active', e[key+'Status']===b.dataset.value));
+      });
+    });
+  });
+
+  document.getElementById('modalOverlay').classList.add('open');
+}
+
+function closeModal(){
+  document.getElementById('modalOverlay').classList.remove('open');
+  const e = entries.find(x=>x.id===activeId);
+  if (activeIsNew && e) {
+    const blank = !e.comments && SECTIONS.every(s => !e[s.key+'Status'] && !e[s.key+'Next']);
+    if (blank) {
+      entries = entries.filter(x=>x.id!==activeId);
+    }
+  }
+  activeId = null;
+  activeIsNew = false;
+  render();
+  saveMonth();
+}
+
+document.getElementById('modalCloseBtn').addEventListener('click', closeModal);
+document.getElementById('modalSaveBtn').addEventListener('click', closeModal);
+document.getElementById('modalOverlay').addEventListener('click', ev=>{
+  if (ev.target.id === 'modalOverlay') closeModal();
+});
+
+document.getElementById('addBtn').addEventListener('click', ()=>{
+  const e = {
+    id: uid(),
+    date: todayISOInMonth(year,month),
+    comments: ''
+  };
+  SECTIONS.forEach(s => { e[s.key+'Status'] = ''; e[s.key+'Next'] = ''; });
+  entries.push(e);
+  openModal(e.id, true);
+});
+
+document.getElementById('prevBtn').addEventListener('click', ()=>{
+  if (year === START_YEAR && month === START_MONTH) return;
+  month--;
+  if (month < 1) { month = 12; year--; }
+  loadMonth(year,month);
+});
+
+document.getElementById('nextBtn').addEventListener('click', ()=>{
+  month++;
+  if (month > 12) { month = 1; year++; }
+  loadMonth(year,month);
+});
+
+year = START_YEAR;
+month = START_MONTH;
+loadMonth(year,month);
+</script>
+</body>
+</html>
