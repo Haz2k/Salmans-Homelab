@@ -20,11 +20,10 @@
     - /opt/core_stack/hifth-tracker/data
 
 - name: Sync hifth-tracker app source
-  ansible.posix.synchronize:
+  ansible.builtin.copy:
     src: hifth-tracker/
     dest: /opt/core_stack/hifth-tracker/app/
-    delete: true
-  delegate_to: "{{ inventory_hostname }}"
+    mode: preserve
 
 - name: Template docker-compose.yml
   ansible.builtin.template:
