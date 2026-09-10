@@ -1,11 +1,12 @@
 ---
-# core_stack — Authelia, Vaultwarden, DuckDNS.
+# core_stack — Authelia, Vaultwarden, DuckDNS, hifth-tracker.
 #
 # Sourcing:
 #   Authelia:   https://www.authelia.com/integration/deployment/docker/
 #   Vaultwarden: https://github.com/dani-garcia/vaultwarden (no separate
 #                official site — README is the primary doc)
 #   DuckDNS:    https://www.duckdns.org/install.jsp (Docker section)
+#   hifth-tracker: self-authored, source in files/hifth-tracker/
 
 - name: Create core_stack directories
   ansible.builtin.file:
@@ -15,6 +16,15 @@
   loop:
     - /opt/core_stack
     - /opt/core_stack/authelia
+    - /opt/core_stack/hifth-tracker
+    - /opt/core_stack/hifth-tracker/data
+
+- name: Sync hifth-tracker app source
+  ansible.posix.synchronize:
+    src: hifth-tracker/
+    dest: /opt/core_stack/hifth-tracker/app/
+    delete: true
+  delegate_to: "{{ inventory_hostname }}"
 
 - name: Template docker-compose.yml
   ansible.builtin.template:
@@ -38,3 +48,4 @@
   community.docker.docker_compose_v2:
     project_src: /opt/core_stack
     state: present
+    build: always
