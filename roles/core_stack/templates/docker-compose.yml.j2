@@ -2,6 +2,7 @@
 #   Authelia:    https://www.authelia.com/integration/deployment/docker/
 #   Vaultwarden: https://github.com/dani-garcia/vaultwarden (README — no separate docs site)
 #   DuckDNS:     https://www.duckdns.org/install.jsp (Docker section)
+#   hifth-tracker: self-authored
 
 services:
   authelia:
@@ -55,6 +56,21 @@ services:
       SUBDOMAINS: "{{ vault_duckdns_subdomain }}"
       TOKEN: "{{ vault_duckdns_token }}"
       UPDATE_IP: "ipv4"
+    restart: unless-stopped
+
+  hifth-tracker:
+    build: /opt/core_stack/hifth-tracker/app
+    container_name: hifth-tracker
+    volumes:
+      - /opt/core_stack/hifth-tracker/data:/data
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.hifth-tracker.rule=Host(`hifth.{{ vault_domain }}`)"
+      - "traefik.http.routers.hifth-tracker.entrypoints=websecure"
+      - "traefik.http.routers.hifth-tracker.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.hifth-tracker.middlewares=authelia@docker"
+    networks:
+      - proxy
     restart: unless-stopped
 
 networks:
