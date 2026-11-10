@@ -49,8 +49,8 @@ ansible-playbook site.yml --tags init --vault-password-file .vault_pass
 # patch everything (OS + containers)
 ansible-playbook site.yml --tags upgrade --vault-password-file .vault_pass
 
-# rebuild just one stack, e.g. media
-ansible-playbook site.yml --tags media_stack --vault-password-file .vault_pass
+# rebuild just one stack, e.g. monitoring
+ansible-playbook site.yml --tags monitoring_stack --vault-password-file .vault_pass
 ```
 
 ## Secrets model

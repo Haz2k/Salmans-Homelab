@@ -45,21 +45,6 @@
     label: "{{ item.key }}"
   tags: [pihole, core_stack, media_stack, monitoring_stack, automation_stack, receipts_stack]
 
-- name: Add TUN cgroup + mount entries for media_stack LXC (Gluetun requires /dev/net/tun)
-  ansible.builtin.lineinfile:
-    path: "/etc/pve/nodes/{{ lxc_services.media_stack.node }}/lxc/{{ lxc_services.media_stack.ctid }}.conf"
-    line: "{{ item }}"
-    create: false
-  loop:
-    - "lxc.cgroup2.devices.allow: c 10:200 rwm"
-    - "lxc.mount.entry: /dev/net/tun dev/net/tun none bind,create=file"
-  register: tun_conf_result
-
-- name: Reboot media_stack LXC if TUN config changed
-  ansible.builtin.command: "pct reboot {{ lxc_services.media_stack.ctid }}"
-  delegate_to: "{{ lxc_services.media_stack.node }}"
-  when: tun_conf_result.results | selectattr('changed') | list | length > 0
-
 # NOTE: Scoped API token vars (vault_proxmox_api_*) used by all other roles
 # (e.g. pve_exporter) live in group_vars/all/vault.yml, encrypted with
 # Ansible Vault. The elevated root@pam token (vault_proxmox_root_api_*) is

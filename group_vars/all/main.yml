@@ -20,14 +20,6 @@ lxc_services:
     node: pve1
     apps: [nginx_proxy_manager_replaced_by_traefik, authelia, vaultwarden, duckdns]
 
-  media_stack:
-    ctid: 103
-    ip: 192.168.0.6
-    cores: 4
-    memory: 4096
-    node: pve2
-    apps: [jellyfin, sonarr, radarr, prowlarr, qbittorrent, gluetun, jellyseerr, maintainerr]
-
   monitoring_stack:
     ctid: 104
     ip: 192.168.0.7
@@ -51,6 +43,23 @@ lxc_services:
     memory: 2048
     node: pve2
     apps: [receipts]
+
+  photos_stack:
+    ctid: 106
+    ip: 192.168.0.9
+    cores: 4
+    memory: 6144
+    node: pve2
+    apps: [immich]
+
+  sandbox:
+    ctid: 107
+    ip: 192.168.0.10
+    cores: 2
+    memory: 3072
+    disk: 30G
+    node: pve1
+    apps: [frigate, test_apps]  # managed from Dockhand, NOT by Ansible
 
   ansible_control:
     ctid: 100

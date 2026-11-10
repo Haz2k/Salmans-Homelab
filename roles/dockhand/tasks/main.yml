@@ -1,0 +1,28 @@
+---
+# dockhand
+#
+# One Dockhand per LXC, talking to that LXC's own Docker socket (no agents,
+# no tokens). Gives a UI for pull/redeploy/logs/shell on every CT.
+# Host port 3001 because Semaphore (CT100) and Grafana (CT104) already use 3000.
+#
+# FIRST INSTALL ONLY — do not re-run to "update" Dockhand; update it from its
+# own UI/compose. Pin a real tag below before the next rebuild.
+# Docs: https://github.com/Finsys/dockhand
+
+- name: Create dockhand directory
+  ansible.builtin.file:
+    path: /opt/dockhand
+    state: directory
+    mode: "0755"
+
+- name: Template dockhand compose file
+  ansible.builtin.template:
+    src: docker-compose.yml.j2
+    dest: /opt/dockhand/docker-compose.yml
+    mode: "0644"
+    force: false   # never overwrite a compose file that already exists
+
+- name: Start dockhand
+  community.docker.docker_compose_v2:
+    project_src: /opt/dockhand
+    state: present

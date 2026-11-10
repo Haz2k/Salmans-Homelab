@@ -37,16 +37,6 @@
         update_stack_name: core_stack
         update_stack_dir: /opt/core_stack
 
-- name: Update media_stack (Jellyfin, *arr, qBittorrent, Gluetun)
-  hosts: media_stack
-  become: true
-  tags: [media_stack]
-  roles:
-    - role: container_update
-      vars:
-        update_stack_name: media_stack
-        update_stack_dir: /opt/media_stack
-
 - name: Update monitoring_stack (Prometheus, Grafana, etc.)
   hosts: monitoring_stack
   become: true

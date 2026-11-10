@@ -33,10 +33,6 @@ vault_vaultwarden_admin_token: "CHANGE_ME"
 vault_duckdns_subdomain: "CHANGE_ME"
 vault_duckdns_token: "CHANGE_ME"
 
-# --- media_stack: Gluetun / ProtonVPN ---
-vault_protonvpn_wireguard_private_key: "CHANGE_ME"
-vault_protonvpn_server_country: "Netherlands"
-
 # --- monitoring_stack ---
 vault_grafana_admin_password: "CHANGE_ME"
 vault_speedtest_tracker_app_key: "CHANGE_ME_BASE64"

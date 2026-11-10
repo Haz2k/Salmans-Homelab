@@ -1,0 +1,55 @@
+---
+# os_update.yml — routine OS patching for the app LXCs + the Pi.
+# Meant to be run from Semaphore (weekly schedule) or by hand.
+#
+#   ansible-playbook os_update.yml --vault-password-file .vault_pass
+#
+# - Proxmox nodes are NOT patched here: do those one at a time from the
+#   Proxmox UI (Node -> Updates) so the cluster never loses quorum.
+# - ansible_control (Semaphore itself) is excluded: upgrading Docker mid-run
+#   would restart the daemon and kill this very job. Patch it by hand from
+#   CT100:  ansible-playbook os_update.yml --tags ansible_control
+
+- name: Patch app LXCs (one at a time)
+  hosts: lxc_hosts:!ansible_control
+  become: true
+  serial: 1
+  tags: [lxc]
+  tasks:
+    - name: Apt dist-upgrade
+      ansible.builtin.apt:
+        update_cache: true
+        upgrade: dist
+        autoremove: true
+        autoclean: true
+
+    - name: Check if a reboot is needed
+      ansible.builtin.stat:
+        path: /var/run/reboot-required
+      register: os_update_reboot
+
+    - name: Report pending reboot
+      ansible.builtin.debug:
+        msg: "{{ inventory_hostname }} needs a reboot (do it from the Proxmox UI)"
+      when: os_update_reboot.stat.exists
+
+- name: Patch the QDevice Pi
+  hosts: qdevice
+  become: true
+  tags: [qdevice]
+  tasks:
+    - name: Apt dist-upgrade
+      ansible.builtin.apt:
+        update_cache: true
+        upgrade: dist
+        autoremove: true
+
+- name: Patch ansible_control — MANUAL RUN ONLY
+  hosts: ansible_control
+  become: true
+  tags: [ansible_control, never]
+  tasks:
+    - name: Apt dist-upgrade
+      ansible.builtin.apt:
+        update_cache: true
+        upgrade: dist

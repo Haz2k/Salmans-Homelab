@@ -2,8 +2,11 @@
 # Master playbook. Run the whole thing, or scope with --tags.
 #
 #   ansible-playbook site.yml --tags init      # bootstrap an empty environment
-#   ansible-playbook site.yml --tags upgrade    # patch everything (OS + containers)
-#   ansible-playbook site.yml --tags media_stack  # rebuild just one stack
+#   ansible-playbook site.yml --tags monitoring_stack  # rebuild just one stack
+#
+# FIRST INSTALL ONLY. After bootstrap, day-2 work happens in UIs:
+#   Proxmox UI = CTs, Dockhand (:3001 on every CT) = containers,
+#   Semaphore = OS patching (os_update.yml) + stack updates (update.yml).
 #
 # All runs need: --vault-password-file /path/to/.vault_pass (kept on the
 # flash drive, never in this repo).
@@ -29,6 +32,13 @@
   roles:
     - docker
 
+- name: Install Dockhand on every app LXC (day-2 container management UI)
+  hosts: lxc_hosts
+  become: true
+  tags: [init, dockhand]
+  roles:
+    - dockhand
+
 - name: Deploy Pi-hole (standalone, not in a Docker stack)
   hosts: pihole
   become: true
@@ -49,13 +59,6 @@
   tags: [core_stack]
   roles:
     - core_stack
-
-- name: Deploy media stack (Jellyfin, *arr, qBittorrent, Gluetun)
-  hosts: media_stack
-  become: true
-  tags: [media_stack]
-  roles:
-    - media_stack
 
 - name: Deploy monitoring stack (Prometheus, Grafana, Scrutiny, Uptime Kuma)
   hosts: monitoring_stack
