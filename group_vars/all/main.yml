@@ -45,7 +45,7 @@ lxc_services:
     apps: [receipts]
 
   photos_stack:
-    ctid: 106
+    ctid: 107
     ip: 192.168.0.9
     cores: 4
     memory: 6144
@@ -53,7 +53,7 @@ lxc_services:
     apps: [immich]
 
   sandbox:
-    ctid: 107
+    ctid: 108
     ip: 192.168.0.10
     cores: 2
     memory: 3072
