@@ -11,8 +11,10 @@
     name: willshersystems.sshd
   vars:
     sshd_PasswordAuthentication: "no"
-    sshd_PermitRootLogin: "no"
-    sshd_AllowUsers: "{{ ansible_user }}"
+    # Overridable per host/group (inventory) so Proxmox nodes can keep
+    # key-only root SSH between each other (needed for replication/migration).
+    sshd_PermitRootLogin: "{{ sshd_root_login | default('no') }}"
+    sshd_AllowUsers: "{{ sshd_allow_users | default(ansible_user) }}"
 
 - name: Apply base OS security (fail2ban, auto-updates, etc.)
   ansible.builtin.import_role:
@@ -22,9 +24,10 @@
   ansible.builtin.import_role:
     name: geerlingguy.firewall
   vars:
-    firewall_allowed_tcp_ports:
-      - "22"      # SSH
-      - "8006"    # Proxmox UI (Tailscale-only in practice — see notes.md)
+    # Base ports + per-group extras. The QDevice Pi MUST allow TCP 5403 or the
+    # cluster loses its tie-breaker vote (inventory: firewall_extra_tcp_ports).
+    firewall_allowed_tcp_ports: "{{ ['22', '8006'] + (firewall_extra_tcp_ports | default([])) }}"
+    firewall_allowed_udp_ports: "{{ firewall_extra_udp_ports | default([]) }}"
 
 # TODO once at home base:
 # - Proxmox UI 2FA (TOTP) is configured manually in the web UI, not via
