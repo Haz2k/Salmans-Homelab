@@ -43,7 +43,7 @@
   loop: "{{ lxc_services | dict2items }}"
   loop_control:
     label: "{{ item.key }}"
-  tags: [pihole, core_stack, media_stack, monitoring_stack, automation_stack, receipts_stack]
+  tags: [pihole, core_stack, monitoring_stack, automation_stack, receipts_stack, photos_stack, sandbox]
 
 # NOTE: Scoped API token vars (vault_proxmox_api_*) used by all other roles
 # (e.g. pve_exporter) live in group_vars/all/vault.yml, encrypted with
