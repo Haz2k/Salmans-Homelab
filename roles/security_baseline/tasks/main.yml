@@ -34,6 +34,11 @@
 - name: Apply base OS security (fail2ban, auto-updates, etc.)
   ansible.builtin.import_role:
     name: geerlingguy.security
+  vars:
+    # geerlingguy.security rewrites the PermitRootLogin line AFTER the sshd role
+    # runs (default "no"), silently undoing the per-group override. Pass the same
+    # value so both roles agree (Proxmox nodes: prohibit-password).
+    security_ssh_permit_root_login: "{{ sshd_root_login | default('no') }}"
 
 - name: Apply firewall baseline
   ansible.builtin.import_role:
