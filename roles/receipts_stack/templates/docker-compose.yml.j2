@@ -1,0 +1,36 @@
+services:
+  receipts-db:
+    image: postgres:16-alpine
+    container_name: receipts-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: receipts
+      POSTGRES_USER: receipts
+      POSTGRES_PASSWORD: "{{ vault_receipts_db_password }}"
+    volumes:
+      - /opt/receipts_stack/postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U receipts"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  receipts-app:
+    build: /opt/receipts_stack/app
+    container_name: receipts-app
+    restart: unless-stopped
+    depends_on:
+      receipts-db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: "postgresql://receipts:{{ vault_receipts_db_password }}@receipts-db:5432/receipts"
+      ANTHROPIC_API_KEY: "{{ vault_anthropic_api_key }}"
+      RECEIPTS_DATA_DIR: /data/receipts
+    volumes:
+      - /mnt/pve/storage/receipts:/data/receipts
+    ports:
+      - "8000:8000"
+    # NOTE: this LXC is separate from core_stack, so Traefik Docker labels
+    # won't pick this up (per your networking learnings). Route it instead
+    # via Traefik's file provider — see traefik-dynamic-receipts.yml.j2 in
+    # this same role, dropped into your traefik role's dynamic config dir.

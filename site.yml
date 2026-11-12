@@ -25,7 +25,7 @@
 - name: Install Docker on the app-hosting LXCs
   hosts: lxc_hosts
   become: true
-  tags: [init, docker]
+  tags: [init, docker, receipts_stack]
   roles:
     - docker
 
@@ -84,3 +84,10 @@
   tags: [init, semaphore]
   roles:
     - semaphore
+
+- name: Deploy receipts stack (self-hosted receipt tracker)
+  hosts: receipts_stack
+  become: true
+  tags: [receipts_stack]
+  roles:
+    - receipts_stack

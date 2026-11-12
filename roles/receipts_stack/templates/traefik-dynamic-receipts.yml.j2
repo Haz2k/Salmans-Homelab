@@ -1,0 +1,27 @@
+# Drop this into your traefik role's dynamic-config directory
+# (wherever your other file-provider routes for non-core_stack services
+# already live — same pattern your other cross-LXC stacks use).
+#
+# Uses authelia@file, not authelia@docker, since this route is defined
+# via the file provider, not Docker labels.
+
+http:
+  routers:
+    receipts:
+      rule: "Host(`receipts.{{ vault_duckdns_domain }}`)"
+      entryPoints:
+        - websecure
+      service: receipts
+      tls:
+        certResolver: letsencrypt
+      middlewares:
+        - authelia@file
+
+  services:
+    receipts:
+      loadBalancer:
+        servers:
+          - url: "http://192.168.0.9:8000"
+        healthCheck:
+          path: /api/health
+          interval: "10s"

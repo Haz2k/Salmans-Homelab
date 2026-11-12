@@ -1,0 +1,37 @@
+---
+# roles/receipts_stack/tasks/main.yml
+# Deploys the self-hosted receipt tracker: FastAPI + Postgres.
+# Assumes the receipts_stack LXC (CTID 106, 192.168.0.9) already exists via
+# proxmox_lxc_provision — add an entry to that role's LXC list var first,
+# matching the format of your existing pihole/core_stack/etc. entries.
+
+- name: Ensure receipts_stack app + data directories exist
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    mode: "0755"
+  loop:
+    - /opt/receipts_stack
+    - /opt/receipts_stack/app
+    - /opt/receipts_stack/postgres
+    - /mnt/pve/storage/receipts
+
+- name: Copy receipts-app source to host
+  ansible.builtin.copy:
+    src: receipts-app/
+    dest: /opt/receipts_stack/app/
+    mode: "0644"
+    directory_mode: "0755"
+
+- name: Template receipts_stack docker-compose.yml
+  ansible.builtin.template:
+    src: docker-compose.yml.j2
+    dest: /opt/receipts_stack/docker-compose.yml
+    mode: "0644"
+  notify: restart receipts_stack
+
+- name: Deploy receipts_stack
+  community.docker.docker_compose_v2:
+    project_src: /opt/receipts_stack
+    state: present
+    build: always

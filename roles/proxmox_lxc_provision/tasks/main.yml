@@ -43,6 +43,7 @@
   loop: "{{ lxc_services | dict2items }}"
   loop_control:
     label: "{{ item.key }}"
+  tags: [pihole, core_stack, media_stack, monitoring_stack, automation_stack, receipts_stack]
 
 - name: Add TUN cgroup + mount entries for media_stack LXC (Gluetun requires /dev/net/tun)
   ansible.builtin.lineinfile:

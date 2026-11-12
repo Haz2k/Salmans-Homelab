@@ -1,0 +1,5 @@
+---
+- name: restart receipts_stack
+  community.docker.docker_compose_v2:
+    project_src: /opt/receipts_stack
+    state: restarted

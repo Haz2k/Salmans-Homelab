@@ -1,0 +1,19 @@
+# Static route for receipts_stack — separate LXC from Traefik.
+# Gated behind Authelia SSO.
+http:
+  routers:
+    receipts:
+      rule: "Host(`receipts.{{ vault_domain }}`)"
+      entrypoints:
+        - websecure
+      service: receipts
+      middlewares:
+        - authelia@docker
+      tls:
+        certResolver: letsencrypt
+
+  services:
+    receipts:
+      loadBalancer:
+        servers:
+          - url: "http://{{ lxc_services.receipts_stack.ip }}:8000"

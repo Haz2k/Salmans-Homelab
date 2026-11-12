@@ -44,6 +44,14 @@ lxc_services:
     node: pve2
     apps: [home_assistant, ollama, paperless_ngx]
 
+  receipts_stack:
+    ctid: 106
+    ip: 192.168.0.9
+    cores: 2
+    memory: 2048
+    node: pve2
+    apps: [receipts]
+
   ansible_control:
     ctid: 100
     ip: 192.168.0.3
