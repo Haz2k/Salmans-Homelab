@@ -6,6 +6,15 @@
 # willshersystems.sshd. This file just wires them together with the
 # homelab-specific settings.
 
+# Raspberry Pi OS ships a cloud-init drop-in that sets PasswordAuthentication yes.
+# sshd uses the FIRST value it sees and the drop-in is included first, so it
+# silently overrides our hardening. Remove it (no-op on hosts without it).
+- name: Remove cloud-init sshd drop-in that re-enables password login
+  ansible.builtin.file:
+    path: /etc/ssh/sshd_config.d/50-cloud-init.conf
+    state: absent
+  register: security_baseline_cloudinit_dropin
+
 - name: Apply SSH hardening (key-only, no root login)
   ansible.builtin.import_role:
     name: willshersystems.sshd
@@ -15,6 +24,12 @@
     # key-only root SSH between each other (needed for replication/migration).
     sshd_PermitRootLogin: "{{ sshd_root_login | default('no') }}"
     sshd_AllowUsers: "{{ sshd_allow_users | default(ansible_user) }}"
+
+- name: Reload sshd if the drop-in was removed
+  ansible.builtin.service:
+    name: ssh
+    state: reloaded
+  when: security_baseline_cloudinit_dropin is changed
 
 - name: Apply base OS security (fail2ban, auto-updates, etc.)
   ansible.builtin.import_role:
