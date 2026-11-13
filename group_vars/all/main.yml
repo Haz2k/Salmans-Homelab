@@ -51,7 +51,7 @@ lxc_services:
     ip: 192.168.0.10
     cores: 4
     memory: 6144
-    node: pve2
+    node: pve1
     apps: [immich]
 
   sandbox:
