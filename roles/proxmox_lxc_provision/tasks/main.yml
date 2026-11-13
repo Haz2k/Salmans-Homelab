@@ -1,51 +1,94 @@
 ---
 # proxmox_lxc_provision
 #
-# Creates one LXC per entry in group_vars/all.yml -> lxc_services, using
-# the community.proxmox.proxmox module (see requirements.yml for the
-# collection). Docs:
-# https://docs.ansible.com/ansible/latest/collections/community/general/proxmox_module.html
-#
-# NOTE: LXC creation specifically requires a root@pam API token — Proxmox
-# hardcodes a restriction (in PVE::Storage.pm) blocking any non-root@pam
-# token from passing a filesystem path via `ostemplate`, regardless of the
-# permissions granted to that token. This is unrelated to Privilege
-# Separation or any ACL config; it cannot be worked around with a scoped
-# user. All other roles/tasks continue to use the scoped ansible@pve token.
+# Creates one LXC per entry in group_vars/all/main.yml -> lxc_services by running
+# `pct create` ON the target Proxmox node (as root via sudo). This avoids the
+# Proxmox API-token restriction entirely ("Only root can pass arbitrary
+# filesystem paths") and needs no root API token or python proxmoxer.
+# Existing CTs are detected by their config file and left completely alone.
+# Run from the control node; each task is delegated to the CT's own node.
 
-- name: Ensure proxmoxer Python library is installed (required by the module)
-  ansible.builtin.apt:
-    name: python3-proxmoxer
-    state: present
-
-- name: Create LXC containers for each service stack
-  community.proxmox.proxmox:
-    api_user: "{{ vault_proxmox_root_api_user }}"
-    api_token_id: "{{ vault_proxmox_root_api_token_id }}"
-    api_token_secret: "{{ vault_proxmox_root_api_token_secret }}"
-    api_host: "{{ vault_proxmox_api_host }}"
-    validate_certs: false
-    node: "{{ item.value.node }}"
-    vmid: "{{ item.value.ctid }}"
-    hostname: "{{ item.key | replace('_', '-') }}"
-    ostemplate: "local:vztmpl/debian-12-standard_12.12-1_amd64.tar.zst"
-    storage: local-lvm
-    cmode: shell
-    features: nesting=1
-    cores: "{{ item.value.cores }}"
-    disk: "{{ item.value.disk | default('20G') }}"
-    memory: "{{ item.value.memory }}"
-    netif:
-      net0: "name=eth0,bridge=vmbr0,ip={{ item.value.ip }}/24,gw=192.168.0.1"
-    unprivileged: true
-    state: present
-    update: false
+- name: Check which containers already exist
+  become: true
+  ansible.builtin.stat:
+    path: "/etc/pve/nodes/{{ item.value.node }}/lxc/{{ item.value.ctid }}.conf"
+  register: lxc_conf
   loop: "{{ lxc_services | dict2items }}"
   loop_control:
     label: "{{ item.key }}"
-  tags: [pihole, core_stack, monitoring_stack, automation_stack, receipts_stack, photos_stack, sandbox]
+  tags: &lxc_tags [pihole, core_stack, monitoring_stack, automation_stack, receipts_stack, photos_stack, sandbox]
 
-# NOTE: Scoped API token vars (vault_proxmox_api_*) used by all other roles
-# (e.g. pve_exporter) live in group_vars/all/vault.yml, encrypted with
-# Ansible Vault. The elevated root@pam token (vault_proxmox_root_api_*) is
-# used ONLY here, for LXC creation, per the note above.
+- name: Put the control node's public key on each node that needs a new CT
+  ansible.builtin.copy:
+    content: "{{ lxc_root_pubkey | default(lookup('ansible.builtin.file', '~/.ssh/id_ed25519.pub')) }}\n"
+    dest: /root/.lxc_root_pubkey.pub
+    owner: root
+    mode: "0600"
+  delegate_to: "{{ item.item.value.node }}"
+  become: true
+  when: not item.stat.exists
+  loop: "{{ lxc_conf.results }}"
+  loop_control:
+    label: "{{ item.item.key }}"
+  tags: *lxc_tags
+
+- name: Make sure the Debian 12 template is on the node
+  ansible.builtin.command:
+    cmd: "pveam download local {{ lxc_template }}"
+    creates: "/var/lib/vz/template/cache/{{ lxc_template }}"
+  delegate_to: "{{ item.item.value.node }}"
+  become: true
+  when: not item.stat.exists
+  loop: "{{ lxc_conf.results }}"
+  loop_control:
+    label: "{{ item.item.key }}"
+  tags: *lxc_tags
+
+- name: Create and start the missing containers
+  ansible.builtin.command:
+    argv:
+      - pct
+      - create
+      - "{{ item.item.value.ctid }}"
+      - "local:vztmpl/{{ lxc_template }}"
+      - --hostname
+      - "{{ item.item.key | replace('_', '-') }}"
+      - --cores
+      - "{{ item.item.value.cores }}"
+      - --memory
+      - "{{ item.item.value.memory }}"
+      - --rootfs
+      - "local-lvm:{{ (item.item.value.disk | default('20G')) | string | regex_replace('G$', '') }}"
+      - --net0
+      - "name=eth0,bridge=vmbr0,ip={{ item.item.value.ip }}/24,gw={{ lxc_gateway }}"
+      - --features
+      - nesting=1
+      - --unprivileged
+      - "1"
+      - --onboot
+      - "1"
+      - --ssh-public-keys
+      - /root/.lxc_root_pubkey.pub
+      - --start
+      - "1"
+  delegate_to: "{{ item.item.value.node }}"
+  become: true
+  when: not item.stat.exists
+  loop: "{{ lxc_conf.results }}"
+  loop_control:
+    label: "{{ item.item.key }}"
+  tags: *lxc_tags
+
+- name: Wait for SSH on the new containers
+  ansible.builtin.wait_for:
+    host: "{{ item.item.value.ip }}"
+    port: 22
+    delay: 5
+    timeout: 180
+  delegate_to: localhost
+  become: false
+  when: not item.stat.exists
+  loop: "{{ lxc_conf.results }}"
+  loop_control:
+    label: "{{ item.item.key }}"
+  tags: *lxc_tags

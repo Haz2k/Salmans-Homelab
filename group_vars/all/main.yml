@@ -2,6 +2,8 @@
 # Non-secret shared variables. Secrets go in group_vars/all/vault.yml
 # (Ansible Vault encrypted — created separately, not in this scaffold).
 
+lxc_template: debian-12-standard_12.12-1_amd64.tar.zst
+lxc_gateway: 192.168.0.1
 # One LXC per grouped stack (see roles/*_stack). Pi-hole is intentionally
 # kept on its own LXC, outside Docker, for DNS isolation.
 lxc_services:
