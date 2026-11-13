@@ -1,0 +1,16 @@
+---
+# Immich on CT 107 (photos_stack, lives on pve1 next to the photo disk).
+# Compose/env follow the official Immich v2.6.3 release files.
+
+immich_version: v2.6.3          # same version the old dumps were made with; upgrade later from Dockhand
+immich_postgres_image: ghcr.io/immich-app/postgres:15-vectorchord0.4.3-pgvectors0.2.0   # old dumps are Postgres 15
+immich_db_user: postgres
+immich_db_name: immich
+immich_timezone: America/New_York
+
+# Existing photo data on the Proxmox node (bind-mounted into the CT).
+immich_host_uploads: /mnt/pve/storage/immich/uploads
+immich_uploads_mount: /mnt/immich/uploads
+
+# Database dump restored ONCE on first install (set to "" to start with an empty library).
+immich_restore_dump: /mnt/immich/uploads/backups/immich-db-backup-20260703T020000-v2.6.3-pg15.12.sql.gz

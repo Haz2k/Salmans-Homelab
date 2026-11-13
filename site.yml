@@ -94,3 +94,10 @@
   tags: [receipts_stack]
   roles:
     - receipts_stack
+
+- name: Deploy Immich (photos) with the existing library and database dump
+  hosts: photos_stack
+  become: true
+  tags: [immich]
+  roles:
+    - photos_stack
