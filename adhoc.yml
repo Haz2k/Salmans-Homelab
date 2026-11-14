@@ -1,0 +1,17 @@
+---
+# Run one shell command on any hosts/group, from Semaphore or the command line:
+#   ansible-playbook adhoc.yml -e target=sandbox -e "cmd='docker ps'" --vault-password-file .vault_pass
+# Semaphore: template "Ad-hoc command" asks for target and cmd.
+- name: Ad-hoc command
+  hosts: "{{ target }}"
+  gather_facts: false
+  become: true
+  tasks:
+    - name: Run the command
+      ansible.builtin.shell: "{{ cmd }}"
+      register: adhoc_out
+      changed_when: false
+
+    - name: Show the output
+      ansible.builtin.debug:
+        msg: "{{ adhoc_out.stdout_lines + (adhoc_out.stderr_lines | map('regex_replace', '^', 'stderr: ') | list) }}"
