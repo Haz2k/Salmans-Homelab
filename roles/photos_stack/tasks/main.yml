@@ -95,7 +95,7 @@
     set -o pipefail
     gunzip --stdout "{{ immich_restore_dump }}" \
       | sed "s/SELECT pg_catalog.set_config('search_path', '', false);/SELECT pg_catalog.set_config('search_path', 'public, pg_catalog', true);/g" \
-      | docker exec -i immich_postgres psql --dbname=postgres --username={{ immich_db_user }}
+      | docker exec -i immich_postgres psql --dbname={{ immich_db_name }} --username={{ immich_db_user }}
     touch /opt/photos_stack/.db_restored
   args:
     executable: /bin/bash
