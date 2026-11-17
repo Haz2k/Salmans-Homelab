@@ -19,7 +19,7 @@ What it does (safe to re-run, existing things are reused by name):
 import getpass, json, os, sys, urllib.request, urllib.error, http.cookiejar
 
 BASE = os.environ.get("SEMAPHORE_URL", "http://localhost:3000").rstrip("/")
-ADMIN = os.environ.get("SEMAPHORE_ADMIN", "salman")
+ADMIN = os.environ.get("SEMAPHORE_ADMIN", "admin")
 PROJECT = os.environ.get("PROJECT_NAME", "Deploy Homelab")
 REPO_URL = os.environ.get("REPO_URL", "https://github.com/Haz2k/Salmans-Homelab.git")
 BRANCH = os.environ.get("REPO_BRANCH", "Main")
