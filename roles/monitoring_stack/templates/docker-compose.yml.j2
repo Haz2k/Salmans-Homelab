@@ -10,7 +10,7 @@
 #   Homepage:     https://gethomepage.dev/installation/docker/
 services:
   prometheus:
-    image: prom/prometheus:latest
+    image: prom/prometheus@sha256:5ce7540c3c00ef4ab0c9d2c995c6a5b9c421f44b4a115d97a2c7af3b1c21cbb0
     container_name: prometheus
     volumes:
       - /opt/monitoring_stack/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
@@ -19,7 +19,7 @@ services:
       - "9090:9090"
     restart: unless-stopped
   grafana:
-    image: grafana/grafana:latest
+    image: grafana/grafana@sha256:3fd54ae1214669f8355f065ec9f6445d5279a3d77095ab048ca045685272429b
     container_name: grafana
     environment:
       GF_SECURITY_ADMIN_PASSWORD: "{{ vault_grafana_admin_password }}"
@@ -34,7 +34,7 @@ services:
       - "3000:3000"
     restart: unless-stopped
   node_exporter:
-    image: prom/node-exporter:latest
+    image: prom/node-exporter@sha256:1b4e4438faca4dd7e001dd445d161a4a2091b0fededa84093b3a8dfeae1f1be0
     container_name: node_exporter
     pid: host
     volumes:
@@ -45,7 +45,7 @@ services:
       - "9100:9100"
     restart: unless-stopped
   pve_exporter:
-    image: prompve/prometheus-pve-exporter:latest
+    image: prompve/prometheus-pve-exporter:3.10.0@sha256:4867684c0a937716f11f770a32d32958bded507cf570fc334f774392afcb2f37
     container_name: pve_exporter
     volumes:
       - /opt/monitoring_stack/pve_exporter/pve.yml:/etc/prometheus/pve.yml
@@ -53,7 +53,7 @@ services:
       - "9221:9221"
     restart: unless-stopped
   cadvisor:
-    image: gcr.io/cadvisor/cadvisor:latest
+    image: gcr.io/cadvisor/cadvisor@sha256:3de2bd5203120b866d74a9b283b2ffb8ec382fbf9dc321814700c6ea6f44ec57
     container_name: cadvisor
     volumes:
       - /:/rootfs:ro
@@ -64,7 +64,7 @@ services:
       - "8085:8080"
     restart: unless-stopped
   scrutiny:
-    image: ghcr.io/analogj/scrutiny:latest
+    image: ghcr.io/analogj/scrutiny@sha256:2f3d23edadf6d12f9c26d16808bd8620852a37dd3074e814352a2328d48fccb0
     container_name: scrutiny
     cap_add:
       - SYS_RAWIO
@@ -77,7 +77,7 @@ services:
       - "8082:8080"
     restart: unless-stopped
   uptime_kuma:
-    image: louislam/uptime-kuma:latest
+    image: louislam/uptime-kuma@sha256:3d632903e6af34139a37f18055c4f1bfd9b7205ae1138f1e5e8940ddc1d176f9
     container_name: uptime_kuma
     volumes:
       - /opt/monitoring_stack/uptime_kuma:/app/data
@@ -85,7 +85,7 @@ services:
       - "3001:3001"
     restart: unless-stopped
   speedtest_tracker:
-    image: lscr.io/linuxserver/speedtest-tracker:latest
+    image: lscr.io/linuxserver/speedtest-tracker@sha256:59518a6f2b49254b310cc2e543320dd3fbaa80381b588cd1f2bf116073698c27
     container_name: speedtest_tracker
     environment:
       PUID: 1000
@@ -98,7 +98,7 @@ services:
       - "8765:80"
     restart: unless-stopped
   homepage:
-    image: ghcr.io/gethomepage/homepage:latest
+    image: ghcr.io/gethomepage/homepage:v2.1.2@sha256:da9dca9ec258c628146bed1445da0853f2b88f0b10bafd97c091de807c363d60
     container_name: homepage
     environment:
       TZ: "{{ vault_timezone }}"

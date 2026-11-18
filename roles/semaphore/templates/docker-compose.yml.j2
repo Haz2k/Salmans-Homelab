@@ -4,7 +4,7 @@
 
 services:
   semaphore-db:
-    image: postgres:17
+    image: postgres:17@sha256:e38411452a464af89e5adadb8d223bf53b898d47d6ef918b2d58c08707350449
     container_name: semaphore-db
     hostname: postgres
     restart: unless-stopped
@@ -16,7 +16,7 @@ services:
       - /opt/ansible_control/semaphore-db:/var/lib/postgresql/data
 
   semaphore:
-    image: semaphoreui/semaphore:latest
+    image: semaphoreui/semaphore:v2.19.8@sha256:7da3364f331a80d5d47998866f5833c8de978bd57ad49beb69ad2d1d0f3c5f20
     container_name: semaphore
     restart: unless-stopped
     depends_on:
@@ -40,7 +40,7 @@ services:
       - /opt/ansible_control/semaphore-data:/var/lib/semaphore
 
   diun:
-    image: crazymax/diun:latest
+    image: crazymax/diun:4.33.0@sha256:e324b793eb32dfb7f74d3a39421ebf090141caaadee69b8f78da63112408ee25
     container_name: diun
     command: serve
     volumes:

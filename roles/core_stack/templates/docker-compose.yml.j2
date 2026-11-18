@@ -6,7 +6,7 @@
 
 services:
   authelia:
-    image: authelia/authelia:latest
+    image: authelia/authelia:4.39.20@sha256:1b363e9279e742397966333f364e0876ae02bf5c876de73e83af6d48c57ff51b
     container_name: authelia
     volumes:
       - /opt/core_stack/authelia:/config
@@ -23,7 +23,7 @@ services:
     restart: unless-stopped
 
   vaultwarden:
-    image: vaultwarden/server:latest
+    image: vaultwarden/server:1.37.1@sha256:ebdfe70701c60ac0c28c697e787cea767d7972940b786037b29fe0d507f821e8
     container_name: vaultwarden
     environment:
       DOMAIN: "https://vault.{{ vault_domain }}"
@@ -47,7 +47,7 @@ services:
     restart: unless-stopped
 
   duckdns:
-    image: lscr.io/linuxserver/duckdns:latest
+    image: lscr.io/linuxserver/duckdns@sha256:ac65c0d1d2cdfd380ab7b450d97b8c80b2a30f2e086bd79b4cce2fc7190d33a6
     container_name: duckdns
     environment:
       PUID: 1000
