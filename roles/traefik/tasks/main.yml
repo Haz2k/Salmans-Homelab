@@ -54,6 +54,12 @@
     dest: /opt/traefik/dynamic/dockhand.yml
     mode: "0644"
 
+- name: Template dynamic config for photos_stack (Immich) routing
+  ansible.builtin.template:
+    src: dynamic/photos_stack.yml.j2
+    dest: /opt/traefik/dynamic/photos_stack.yml
+    mode: "0644"
+
 - name: Template docker-compose.yml
   ansible.builtin.template:
     src: docker-compose.yml.j2

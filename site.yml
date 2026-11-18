@@ -108,3 +108,17 @@
   tags: [immich]
   roles:
     - photos_stack
+
+- name: Backup target on pve2 (NFS export of the backup disk)
+  hosts: pve2
+  become: true
+  tags: [backups]
+  roles:
+    - backups
+
+- name: Backup storage, nightly jobs and photo copy (pve1)
+  hosts: pve1
+  become: true
+  tags: [backups]
+  roles:
+    - backups

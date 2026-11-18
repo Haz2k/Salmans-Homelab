@@ -48,6 +48,7 @@
     # cluster loses its tie-breaker vote (inventory: firewall_extra_tcp_ports).
     firewall_allowed_tcp_ports: "{{ ['22', '8006'] + (firewall_extra_tcp_ports | default([])) }}"
     firewall_allowed_udp_ports: "{{ firewall_extra_udp_ports | default([]) }}"
+    firewall_additional_rules: "{{ firewall_extra_rules_by_host[inventory_hostname] | default([]) }}"
 
 # TODO once at home base:
 # - Proxmox UI 2FA (TOTP) is configured manually in the web UI, not via

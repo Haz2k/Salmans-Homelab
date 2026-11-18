@@ -1,0 +1,10 @@
+---
+# backups: pve2's HDD is the backup target (exported to pve1 over NFS, pve1 only).
+# vzdump skips bind mounts, so Immich photos get their own nightly rsync.
+- name: NFS server on pve2
+  ansible.builtin.include_tasks: target.yml
+  when: inventory_hostname == 'pve2'
+
+- name: Storage, nightly jobs and photo copy on pve1
+  ansible.builtin.include_tasks: jobs.yml
+  when: inventory_hostname == 'pve1'

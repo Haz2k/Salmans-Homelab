@@ -1,0 +1,29 @@
+---
+- name: Install rsync
+  ansible.builtin.apt:
+    name: rsync
+    state: present
+
+- name: Add pve2 NFS backup storage (NFSv4 only, so only tcp 2049 is needed)
+  ansible.builtin.shell: |
+    pvesm status | grep -q '^{{ backup_storage_id }} ' ||
+    pvesm add nfs {{ backup_storage_id }} --server {{ backup_server_ip }} --export {{ backup_disk }} --content backup --nodes pve1 --options vers=4.2
+  args:
+    executable: /bin/bash
+
+- name: Nightly backup jobs (snapshot, zstd, keep last 7)
+  ansible.builtin.shell: |
+    pvesh get /cluster/backup --output-format json | grep -q '{{ item.id }}' ||
+    pvesh create /cluster/backup --id {{ item.id }} --node {{ item.node }} --storage {{ item.storage }} --vmid {{ item.vmids }} --schedule {{ item.schedule }} --mode snapshot --compress zstd --prune-backups keep-last=7 --enabled 1
+  args:
+    executable: /bin/bash
+  loop:
+    - { id: backup-pve1, node: pve1, storage: "{{ backup_storage_id }}", vmids: "100,101,102,104,107", schedule: "02:00" }
+    - { id: backup-pve2, node: pve2, storage: marketing-storage, vmids: "105,106", schedule: "02:30" }
+
+- name: Nightly Immich photo copy to pve2 (no --delete, so removed photos stay in the copy)
+  ansible.builtin.cron:
+    name: immich-photo-copy
+    minute: "30"
+    hour: "3"
+    job: "mountpoint -q /mnt/pve/{{ backup_storage_id }} && rsync -a /mnt/pve/storage/immich/uploads/ /mnt/pve/{{ backup_storage_id }}/photos-copy/"

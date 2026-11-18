@@ -1,0 +1,26 @@
+---
+- name: Install NFS server
+  ansible.builtin.apt:
+    name: nfs-kernel-server
+    state: present
+    update_cache: true
+
+- name: Export the backup disk to pve1 only (no_root_squash so vzdump can write as root)
+  ansible.builtin.lineinfile:
+    path: /etc/exports
+    line: "{{ backup_disk }} {{ backup_client_ip }}(rw,sync,no_subtree_check,no_root_squash)"
+    create: true
+    mode: "0644"
+  notify: reload exports
+
+- name: Photo copy folder
+  ansible.builtin.file:
+    path: "{{ backup_disk }}/photos-copy"
+    state: directory
+    mode: "0755"
+
+- name: Enable NFS server
+  ansible.builtin.service:
+    name: nfs-server
+    enabled: true
+    state: started

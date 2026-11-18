@@ -1,0 +1,17 @@
+# Static route for Immich on photos_stack (CT107). No Authelia: the Immich
+# mobile app can't pass an SSO login, and Immich has its own accounts.
+http:
+  routers:
+    photos:
+      rule: "Host(`photos.{{ vault_domain }}`)"
+      entrypoints:
+        - websecure
+      service: photos
+      tls:
+        certResolver: letsencrypt
+
+  services:
+    photos:
+      loadBalancer:
+        servers:
+          - url: "http://{{ lxc_services.photos_stack.ip | default('192.168.0.10') }}:2283"

@@ -80,3 +80,8 @@ zfs_replication_interval_min: 15
 # Image pins for the Dockhand/Hawser roles (tag is cosmetic once a digest is present)
 dockhand_version: "latest@sha256:4fd64d32728c99e5caf39b952a17d85448ee0b8ae76e0961f719ba2e19013988"
 hawser_version: "latest@sha256:bbeebc96c2d03b2721c6bfc88e1b250eb852c66ed3914335a6fe8ced4218f059"
+
+# Extra firewall rules per host (raw iptables lines): NFS from pve1 only, for backups
+firewall_extra_rules_by_host:
+  pve2:
+    - "iptables -A INPUT -p tcp --dport 2049 -s 192.168.0.100 -j ACCEPT"
