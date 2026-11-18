@@ -32,12 +32,19 @@
   roles:
     - docker
 
-- name: Install Dockhand on every app LXC (day-2 container management UI)
-  hosts: lxc_hosts
+- name: Install the main Dockhand on CT100 (one UI for every CT)
+  hosts: ansible_control
   become: true
   tags: [init, dockhand]
   roles:
     - dockhand
+
+- name: Install Hawser agents on every other app LXC
+  hosts: lxc_hosts:!ansible_control
+  become: true
+  tags: [init, hawser]
+  roles:
+    - hawser
 
 - name: Deploy Pi-hole (standalone, not in a Docker stack)
   hosts: pihole

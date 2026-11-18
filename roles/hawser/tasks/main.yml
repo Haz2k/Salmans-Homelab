@@ -1,0 +1,24 @@
+---
+# hawser
+#
+# Agent for the main Dockhand on CT100 (standard mode: Dockhand connects to
+# <CT ip>:2376 with the shared token). Mounts /opt at the same path so
+# Dockhand can adopt the existing /opt/<stack>/docker-compose.yml files.
+# Docs: https://github.com/Finsys/hawser
+
+- name: Create hawser directory
+  ansible.builtin.file:
+    path: /opt/hawser
+    state: directory
+    mode: "0755"
+
+- name: Template hawser compose file
+  ansible.builtin.template:
+    src: docker-compose.yml.j2
+    dest: /opt/hawser/docker-compose.yml
+    mode: "0600"   # contains the token
+
+- name: Start hawser
+  community.docker.docker_compose_v2:
+    project_src: /opt/hawser
+    state: present

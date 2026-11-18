@@ -1,0 +1,17 @@
+# Static route for the main Dockhand on ansible_control (CT100).
+# Dockhand has its own login, so no Authelia middleware.
+http:
+  routers:
+    dockhand:
+      rule: "Host(`dockhand.{{ vault_domain }}`)"
+      entrypoints:
+        - websecure
+      service: dockhand
+      tls:
+        certResolver: letsencrypt
+
+  services:
+    dockhand:
+      loadBalancer:
+        servers:
+          - url: "http://{{ lxc_services.ansible_control.ip | default('192.168.0.3') }}:3001"

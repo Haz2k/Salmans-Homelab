@@ -1,0 +1,14 @@
+services:
+  hawser:
+    image: "ghcr.io/finsys/hawser:{{ hawser_version | default('latest') }}"
+    container_name: hawser
+    restart: unless-stopped
+    ports:
+      - "2376:2376"
+    environment:
+      TOKEN: "{{ vault_hawser_token }}"
+      STACKS_DIR: /opt
+      AGENT_NAME: "{{ inventory_hostname }}"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /opt:/opt
