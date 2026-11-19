@@ -79,6 +79,43 @@
     label: "{{ item.item.key }}"
   tags: *lxc_tags
 
+- name: Create host folders that containers bind-mount (owner only where set)
+  ansible.builtin.file:
+    path: "{{ item.1.path }}"
+    state: directory
+    owner: "{{ item.1.owner | default(omit) }}"
+    group: "{{ item.1.owner | default(omit) }}"
+  delegate_to: "{{ item.0.value.node }}"
+  become: true
+  loop: "{{ lxc_services | dict2items | subelements('value.host_dirs', skip_missing=True) }}"
+  loop_control:
+    label: "{{ item.0.key }}: {{ item.1.path }}"
+  tags: *lxc_tags
+
+- name: Reconcile bind mounts and device passthrough (reboots a CT only if something was missing)
+  ansible.builtin.shell: |
+    set -e
+    conf=$(pct config {{ item.value.ctid }})
+    changed=0
+    {% for m in item.value.mounts | default([]) %}
+    echo "$conf" | grep -qF "mp{{ m.slot }}: {{ m.host }},mp={{ m.ct }}" || { pct set {{ item.value.ctid }} --mp{{ m.slot }} {{ m.host }},mp={{ m.ct }}; changed=1; }
+    {% endfor %}
+    {% for d in item.value.devices | default([]) %}
+    echo "$conf" | grep -qF "dev{{ d.slot }}: {{ d.path }},gid={{ d.gid }}" || { pct set {{ item.value.ctid }} --dev{{ d.slot }} {{ d.path }},gid={{ d.gid }}; changed=1; }
+    {% endfor %}
+    if [ "$changed" = 1 ]; then pct reboot {{ item.value.ctid }} || pct start {{ item.value.ctid }}; echo RECONCILED; fi
+  args:
+    executable: /bin/bash
+  delegate_to: "{{ item.value.node }}"
+  become: true
+  register: lxc_reconcile
+  changed_when: "'RECONCILED' in lxc_reconcile.stdout"
+  when: item.value.mounts is defined or item.value.devices is defined
+  loop: "{{ lxc_services | dict2items }}"
+  loop_control:
+    label: "{{ item.key }}"
+  tags: *lxc_tags
+
 - name: Wait for SSH on the new containers
   ansible.builtin.wait_for:
     host: "{{ item.item.value.ip }}"

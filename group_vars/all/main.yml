@@ -12,6 +12,7 @@ lxc_services:
     ip: 192.168.0.4
     cores: 1
     memory: 512
+    disk: 8G
     node: pve1
 
   core_stack:
@@ -19,6 +20,7 @@ lxc_services:
     ip: 192.168.0.5
     cores: 2
     memory: 2048
+    disk: 12G
     node: pve1
     apps: [nginx_proxy_manager_replaced_by_traefik, authelia, vaultwarden, duckdns]
 
@@ -27,6 +29,7 @@ lxc_services:
     ip: 192.168.0.7
     cores: 2
     memory: 2048
+    disk: 19G
     node: pve1
     apps: [prometheus, grafana, node_exporter, pve_exporter, cadvisor, scrutiny, uptime_kuma, speedtest_tracker]
 
@@ -35,6 +38,7 @@ lxc_services:
     ip: 192.168.0.8
     cores: 2
     memory: 2048
+    disk: 30G
     node: pve2
     apps: [home_assistant, ollama, paperless_ngx]
 
@@ -43,6 +47,7 @@ lxc_services:
     ip: 192.168.0.9
     cores: 2
     memory: 2048
+    disk: 20G
     node: pve2
     apps: [receipts]
 
@@ -51,8 +56,15 @@ lxc_services:
     ip: 192.168.0.10
     cores: 4
     memory: 6144
+    disk: 20G
     node: pve1
-    apps: [immich]
+    apps: [immich, nextcloud]
+    host_dirs:
+      - { path: /mnt/pve/storage/immich/uploads }
+      - { path: /mnt/pve/storage/nextcloud/data, owner: "100033" }
+    mounts:
+      - { slot: 0, host: /mnt/pve/storage/immich/uploads, ct: /mnt/immich/uploads }
+      - { slot: 1, host: /mnt/pve/storage/nextcloud, ct: /mnt/nextcloud }
 
   sandbox:
     ctid: 108
@@ -62,12 +74,19 @@ lxc_services:
     disk: 30G
     node: pve1
     apps: [frigate, test_apps]  # managed from Dockhand, NOT by Ansible
+    host_dirs:
+      - { path: /mnt/pve/storage/frigate, owner: "100000" }
+    devices:
+      - { slot: 0, path: /dev/dri/renderD128, gid: 104 }
+    mounts:
+      - { slot: 0, host: /mnt/pve/storage/frigate, ct: /media/frigate }
 
   ansible_control:
     ctid: 100
     ip: 192.168.0.3
     cores: 2
     memory: 2048
+    disk: 12G
     node: pve1
     apps: [semaphore, diun]
 
