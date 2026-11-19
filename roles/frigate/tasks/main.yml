@@ -1,0 +1,31 @@
+---
+# frigate
+#
+# FIRST INSTALL ONLY: the config is never overwritten, so edits made in
+# Frigate's own config editor (UI) survive playbook re-runs.
+# Needs on the LXC (set from the Proxmox host): /dev/dri/renderD128 passthrough
+# (dev0) and /media/frigate bind mount (mp0).
+- name: Create frigate directories
+  ansible.builtin.file:
+    path: /opt/frigate/config
+    state: directory
+    mode: "0755"
+
+- name: Template frigate config (first install only)
+  ansible.builtin.template:
+    src: config.yml.j2
+    dest: /opt/frigate/config/config.yml
+    mode: "0644"
+    force: false
+
+- name: Template frigate compose file
+  ansible.builtin.template:
+    src: docker-compose.yml.j2
+    dest: /opt/frigate/docker-compose.yml
+    mode: "0644"
+    force: false
+
+- name: Start frigate
+  community.docker.docker_compose_v2:
+    project_src: /opt/frigate
+    state: present

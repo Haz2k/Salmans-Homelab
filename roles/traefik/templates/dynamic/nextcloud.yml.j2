@@ -1,0 +1,17 @@
+# Static route for Nextcloud on photos_stack (CT107). No Authelia: the
+# Nextcloud desktop/phone apps can't pass an SSO login.
+http:
+  routers:
+    nextcloud:
+      rule: "Host(`cloud.{{ vault_domain }}`)"
+      entrypoints:
+        - websecure
+      service: nextcloud
+      tls:
+        certResolver: letsencrypt
+
+  services:
+    nextcloud:
+      loadBalancer:
+        servers:
+          - url: "http://{{ lxc_services.photos_stack.ip | default('192.168.0.10') }}:8080"

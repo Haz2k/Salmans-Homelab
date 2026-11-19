@@ -1,0 +1,21 @@
+services:
+  frigate:
+    image: ghcr.io/blakeblackshear/frigate:0.18.3
+    container_name: frigate
+    restart: unless-stopped
+    shm_size: "256mb"
+    devices:
+      - /dev/dri/renderD128:/dev/dri/renderD128
+    volumes:
+      - /opt/frigate/config:/config
+      - /media/frigate:/media/frigate
+      - type: tmpfs
+        target: /tmp/cache
+        tmpfs:
+          size: 1000000000
+    ports:
+      - "8971:8971"   # authenticated UI (HTTPS)
+      - "5000:5000"   # internal UI, no auth: LAN only
+      - "8554:8554"   # RTSP restream
+      - "8555:8555/tcp"
+      - "8555:8555/udp"

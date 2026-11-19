@@ -122,3 +122,17 @@
   tags: [backups]
   roles:
     - backups
+
+- name: Deploy Frigate (sandbox, test stream first)
+  hosts: sandbox
+  become: true
+  tags: [frigate]
+  roles:
+    - frigate
+
+- name: Deploy Nextcloud (photos_stack)
+  hosts: photos_stack
+  become: true
+  tags: [nextcloud]
+  roles:
+    - nextcloud

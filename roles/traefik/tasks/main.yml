@@ -60,6 +60,12 @@
     dest: /opt/traefik/dynamic/photos_stack.yml
     mode: "0644"
 
+- name: Template dynamic config for nextcloud routing
+  ansible.builtin.template:
+    src: dynamic/nextcloud.yml.j2
+    dest: /opt/traefik/dynamic/nextcloud.yml
+    mode: "0644"
+
 - name: Template docker-compose.yml
   ansible.builtin.template:
     src: docker-compose.yml.j2

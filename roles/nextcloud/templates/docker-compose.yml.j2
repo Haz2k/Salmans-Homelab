@@ -1,0 +1,61 @@
+services:
+  nextcloud-db:
+    image: postgres:16-alpine
+    container_name: nextcloud-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: nextcloud
+      POSTGRES_USER: nextcloud
+      POSTGRES_PASSWORD: "{{ vault_nextcloud_db_password | replace('$', '$$') }}"
+    volumes:
+      - /opt/nextcloud/postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U nextcloud"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  nextcloud-redis:
+    image: redis:7-alpine
+    container_name: nextcloud-redis
+    restart: unless-stopped
+
+  nextcloud:
+    image: nextcloud:33.0.5-apache
+    container_name: nextcloud
+    restart: unless-stopped
+    depends_on:
+      nextcloud-db:
+        condition: service_healthy
+      nextcloud-redis:
+        condition: service_started
+    ports:
+      - "8080:80"
+    environment:
+      POSTGRES_HOST: nextcloud-db
+      POSTGRES_DB: nextcloud
+      POSTGRES_USER: nextcloud
+      POSTGRES_PASSWORD: "{{ vault_nextcloud_db_password | replace('$', '$$') }}"
+      REDIS_HOST: nextcloud-redis
+      NEXTCLOUD_ADMIN_USER: "{{ vault_nextcloud_admin_user }}"
+      NEXTCLOUD_ADMIN_PASSWORD: "{{ vault_nextcloud_admin_password | replace('$', '$$') }}"
+      NEXTCLOUD_TRUSTED_DOMAINS: "cloud.{{ vault_domain }}"
+      OVERWRITEPROTOCOL: https
+      OVERWRITEHOST: "cloud.{{ vault_domain }}"
+      TRUSTED_PROXIES: "{{ lxc_services.core_stack.ip | default('192.168.0.5') }}"
+      PHP_MEMORY_LIMIT: 1024M
+      PHP_UPLOAD_LIMIT: 16G
+    volumes:
+      - /opt/nextcloud/html:/var/www/html
+      - /mnt/nextcloud/data:/var/www/html/data
+
+  nextcloud-cron:
+    image: nextcloud:33.0.5-apache
+    container_name: nextcloud-cron
+    restart: unless-stopped
+    entrypoint: /cron.sh
+    depends_on:
+      - nextcloud
+    volumes:
+      - /opt/nextcloud/html:/var/www/html
+      - /mnt/nextcloud/data:/var/www/html/data

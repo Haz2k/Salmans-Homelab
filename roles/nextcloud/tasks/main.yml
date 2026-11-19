@@ -1,0 +1,24 @@
+---
+# nextcloud (on photos_stack / CT107)
+# Needs the data bind mount from the Proxmox host: /mnt/nextcloud (mp1),
+# files owned by uid 100033 (www-data in an unprivileged LXC).
+- name: Create nextcloud directories
+  ansible.builtin.file:
+    path: "/opt/nextcloud/{{ item }}"
+    state: directory
+    mode: "0755"
+  loop:
+    - ""
+    - html
+    - postgres
+
+- name: Template nextcloud compose file (contains passwords)
+  ansible.builtin.template:
+    src: docker-compose.yml.j2
+    dest: /opt/nextcloud/docker-compose.yml
+    mode: "0600"
+
+- name: Start nextcloud
+  community.docker.docker_compose_v2:
+    project_src: /opt/nextcloud
+    state: present
