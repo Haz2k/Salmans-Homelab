@@ -83,3 +83,5 @@ of every task file. Still TODO before first run:
 - Confirm the LXC OS template name in `proxmox_lxc_provision` matches
   what's actually on your Proxmox storage
 - Scrutiny's `/dev/sda` device path — confirm real disk paths per node
+
+See [docs/REBUILD.md](docs/REBUILD.md) for the rebuild runbook.
