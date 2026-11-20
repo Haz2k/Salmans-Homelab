@@ -107,12 +107,18 @@
   ansible.builtin.template:
     src: homepage-services.yaml.j2
     dest: /opt/monitoring_stack/homepage/services.yaml
-    mode: "0644"
+    mode: "0600"
 
 - name: Template Homepage settings.yaml
   ansible.builtin.template:
     src: homepage-settings.yaml.j2
     dest: /opt/monitoring_stack/homepage/settings.yaml
+    mode: "0644"
+
+- name: Template Homepage widgets.yaml
+  ansible.builtin.template:
+    src: homepage-widgets.yaml.j2
+    dest: /opt/monitoring_stack/homepage/widgets.yaml
     mode: "0644"
 
 - name: Start monitoring_stack

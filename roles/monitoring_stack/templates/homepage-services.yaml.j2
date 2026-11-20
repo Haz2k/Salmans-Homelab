@@ -1,76 +1,138 @@
 ---
-- Core:
-    - Vaultwarden:
-        href: https://vault.{{ vault_domain }}
-        icon: vaultwarden.png
-    - Authelia:
-        href: https://auth.{{ vault_domain }}
-        icon: authelia.png
-
-- Photos & Files:
+- Apps:
     - Immich:
         href: https://photos.{{ vault_domain }}
         icon: immich.png
+        description: Photos
+        siteMonitor: https://photos.{{ vault_domain }}
     - Nextcloud:
         href: https://cloud.{{ vault_domain }}
         icon: nextcloud.png
-    - Receipts:
-        href: https://receipts.{{ vault_domain }}
-        icon: mdi-receipt
-    - Hifth Tracker:
-        href: https://hifth.{{ vault_domain }}
-        icon: mdi-checkbox-marked-outline
-
-- Cameras:
-    - Frigate:
-        href: https://frigate.{{ vault_domain }}
-        icon: frigate.png
-
-- Management:
-    - Dockhand:
-        href: https://dockhand.{{ vault_domain }}
-        icon: docker.png
-
-- Automation:
-    - Home Assistant:
-        href: https://ha.{{ vault_domain }}
-        icon: home-assistant.png
+        description: Files
+        siteMonitor: https://cloud.{{ vault_domain }}/status.php
     - Paperless-ngx:
         href: https://paperless.{{ vault_domain }}
         icon: paperless-ngx.png
+        description: Documents
+        siteMonitor: https://paperless.{{ vault_domain }}
+    - Home Assistant:
+        href: https://ha.{{ vault_domain }}
+        icon: home-assistant.png
+        description: Smart home
+        siteMonitor: https://ha.{{ vault_domain }}
+    - Frigate:
+        href: https://frigate.{{ vault_domain }}
+        icon: frigate.png
+        description: Cameras
+        siteMonitor: https://frigate.{{ vault_domain }}
+        widget:
+          type: frigate
+          url: http://{{ lxc_services.sandbox.ip }}:5000
+
+- Tools:
+    - Vaultwarden:
+        href: https://vault.{{ vault_domain }}
+        icon: vaultwarden.png
+        description: Passwords
+        siteMonitor: https://vault.{{ vault_domain }}
+    - Authelia:
+        href: https://auth.{{ vault_domain }}
+        icon: authelia.png
+        description: Single sign-on
+        siteMonitor: https://auth.{{ vault_domain }}
+    - Dockhand:
+        href: https://dockhand.{{ vault_domain }}
+        icon: docker.png
+        description: Containers
+        siteMonitor: https://dockhand.{{ vault_domain }}
+    - Receipts:
+        href: https://receipts.{{ vault_domain }}
+        icon: mdi-receipt-text
+        description: Expenses
+        siteMonitor: https://receipts.{{ vault_domain }}
+    - Hifth Tracker:
+        href: https://hifth.{{ vault_domain }}
+        icon: mdi-checkbox-marked-outline
+        description: Checklist
+        siteMonitor: https://hifth.{{ vault_domain }}
 
 - Monitoring:
     - Grafana:
         href: https://grafana.{{ vault_domain }}
         icon: grafana.png
+        description: Dashboards
+        siteMonitor: https://grafana.{{ vault_domain }}
+        widget:
+          type: grafana
+          url: http://grafana:3000
+          username: admin
+          password: {{ vault_grafana_admin_password | to_json }}
     - Prometheus:
         href: https://prometheus.{{ vault_domain }}
         icon: prometheus.png
-    - cAdvisor:
-        href: https://cadvisor.{{ vault_domain }}
-        icon: cadvisor.png
-    - Scrutiny:
-        href: https://scrutiny.{{ vault_domain }}
-        icon: scrutiny.png
+        description: Metrics
+        siteMonitor: https://prometheus.{{ vault_domain }}
+        widget:
+          type: prometheus
+          url: http://prometheus:9090
     - Uptime Kuma:
         href: https://uptime.{{ vault_domain }}
         icon: uptime-kuma.png
+        description: Uptime checks
+        siteMonitor: https://uptime.{{ vault_domain }}
+    - Scrutiny:
+        href: https://scrutiny.{{ vault_domain }}
+        icon: scrutiny.png
+        description: Disk health
+        siteMonitor: https://scrutiny.{{ vault_domain }}
     - Speedtest Tracker:
         href: https://speedtest.{{ vault_domain }}
         icon: speedtest-tracker.png
+        description: Internet speed
+        siteMonitor: https://speedtest.{{ vault_domain }}
 
-# Kept LAN/Tailscale-only intentionally (not routed through public Traefik) —
-# infra control-plane apps, higher-value targets if exposed publicly.
-- Infrastructure (LAN only):
-    - Semaphore:
-        href: http://{{ lxc_services.ansible_control.ip }}:3000
-        icon: semaphore.png
-    - Pi-hole:
-        href: http://{{ lxc_services.pihole.ip }}:8081/admin
-        icon: pi-hole.png
+# Kept LAN-only intentionally (infra control-plane apps). Direct links so they
+# work even if DNS or Traefik is down.
+- Infrastructure:
     - Proxmox (pve1):
         href: https://192.168.0.100:8006
         icon: proxmox.png
+        description: Node 1
+        ping: 192.168.0.100
+        widget:
+          type: proxmox
+          url: https://192.168.0.100:8006
+          username: {{ (vault_proxmox_api_user ~ '!' ~ vault_proxmox_api_token_id) | to_json }}
+          password: {{ vault_proxmox_api_token_secret | to_json }}
+          node: pve1
     - Proxmox (pve2):
         href: https://192.168.0.150:8006
         icon: proxmox.png
+        description: Node 2
+        ping: 192.168.0.150
+        widget:
+          type: proxmox
+          url: https://192.168.0.150:8006
+          username: {{ (vault_proxmox_api_user ~ '!' ~ vault_proxmox_api_token_id) | to_json }}
+          password: {{ vault_proxmox_api_token_secret | to_json }}
+          node: pve2
+    - Pi-hole:
+        href: http://{{ lxc_services.pihole.ip }}:8081/admin
+        icon: pi-hole.png
+        description: DNS
+        siteMonitor: http://{{ lxc_services.pihole.ip }}:8081/admin
+        widget:
+          type: pihole
+          url: http://{{ lxc_services.pihole.ip }}:8081
+          version: 6
+          key: {{ vault_pihole_webpassword | to_json }}
+    - Semaphore:
+        href: http://{{ lxc_services.ansible_control.ip }}:3000
+        icon: semaphore.png
+        description: Updates
+        siteMonitor: http://{{ lxc_services.ansible_control.ip }}:3000
+    - cAdvisor:
+        href: https://cadvisor.{{ vault_domain }}
+        icon: cadvisor.png
+        description: Container stats
+        siteMonitor: https://cadvisor.{{ vault_domain }}
