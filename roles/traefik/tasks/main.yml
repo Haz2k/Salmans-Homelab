@@ -66,6 +66,18 @@
     dest: /opt/traefik/dynamic/nextcloud.yml
     mode: "0644"
 
+- name: Template dynamic config for frigate routing
+  ansible.builtin.template:
+    src: dynamic/frigate.yml.j2
+    dest: /opt/traefik/dynamic/frigate.yml
+    mode: "0644"
+
+- name: Template dynamic config for admin tools (LAN-only)
+  ansible.builtin.template:
+    src: dynamic/admin_services.yml.j2
+    dest: /opt/traefik/dynamic/admin_services.yml
+    mode: "0644"
+
 - name: Template docker-compose.yml
   ansible.builtin.template:
     src: docker-compose.yml.j2

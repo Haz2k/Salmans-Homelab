@@ -1,0 +1,23 @@
+# Frigate on the sandbox CT (CT108). Backend is Frigate's authenticated HTTPS
+# port (8971, self-signed cert), so Traefik skips certificate verification
+# for this one backend. Frigate has its own login, so no Authelia.
+http:
+  routers:
+    frigate:
+      rule: "Host(`frigate.{{ vault_domain }}`)"
+      entrypoints:
+        - websecure
+      service: frigate
+      tls:
+        certResolver: letsencrypt
+
+  services:
+    frigate:
+      loadBalancer:
+        serversTransport: frigate-insecure
+        servers:
+          - url: "https://{{ lxc_services.sandbox.ip | default('192.168.0.11') }}:8971"
+
+  serversTransports:
+    frigate-insecure:
+      insecureSkipVerify: true

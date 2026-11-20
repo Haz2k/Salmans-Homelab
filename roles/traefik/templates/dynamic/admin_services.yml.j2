@@ -1,0 +1,61 @@
+# Admin tools reachable by name from the home network only (lan-only middleware).
+http:
+  middlewares:
+    lan-only:
+      ipAllowList:
+        sourceRange:
+          - 192.168.0.0/24
+
+  routers:
+    semaphore:
+      rule: "Host(`semaphore.{{ vault_domain }}`)"
+      entrypoints: [websecure]
+      service: semaphore
+      middlewares: [lan-only]
+      tls:
+        certResolver: letsencrypt
+    pihole:
+      rule: "Host(`pihole.{{ vault_domain }}`)"
+      entrypoints: [websecure]
+      service: pihole
+      middlewares: [lan-only]
+      tls:
+        certResolver: letsencrypt
+    pve1:
+      rule: "Host(`pve1.{{ vault_domain }}`)"
+      entrypoints: [websecure]
+      service: pve1
+      middlewares: [lan-only]
+      tls:
+        certResolver: letsencrypt
+    pve2:
+      rule: "Host(`pve2.{{ vault_domain }}`)"
+      entrypoints: [websecure]
+      service: pve2
+      middlewares: [lan-only]
+      tls:
+        certResolver: letsencrypt
+
+  services:
+    semaphore:
+      loadBalancer:
+        servers:
+          - url: "http://{{ lxc_services.ansible_control.ip | default('192.168.0.3') }}:3000"
+    pihole:
+      loadBalancer:
+        servers:
+          - url: "http://{{ lxc_services.pihole.ip | default('192.168.0.4') }}:8081"
+    pve1:
+      loadBalancer:
+        serversTransport: pve-insecure
+        servers:
+          - url: "https://192.168.0.100:8006"
+    pve2:
+      loadBalancer:
+        serversTransport: pve-insecure
+        servers:
+          - url: "https://192.168.0.150:8006"
+
+  serversTransports:
+    pve-insecure:
+      insecureSkipVerify: true
