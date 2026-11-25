@@ -1,0 +1,2 @@
+scrutiny_collector_version: v0.9.3
+scrutiny_hub_url: "http://{{ lxc_services.monitoring_stack.ip }}:8082"

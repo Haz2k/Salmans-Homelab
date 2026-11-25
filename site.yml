@@ -136,3 +136,10 @@
   tags: [nextcloud]
   roles:
     - nextcloud
+
+- name: Scrutiny S.M.A.R.T. collector on the Proxmox nodes
+  hosts: proxmox_nodes
+  become: true
+  tags: [scrutiny_collector]
+  roles:
+    - scrutiny_collector
