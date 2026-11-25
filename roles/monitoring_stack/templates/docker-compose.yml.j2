@@ -77,7 +77,7 @@ services:
       - "8082:8080"
     restart: unless-stopped
   uptime_kuma:
-    image: louislam/uptime-kuma:latest
+    image: louislam/uptime-kuma:2
     container_name: uptime_kuma
     volumes:
       - /opt/monitoring_stack/uptime_kuma:/app/data
