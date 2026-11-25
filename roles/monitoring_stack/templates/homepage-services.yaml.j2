@@ -25,6 +25,10 @@
         icon: paperless-ngx.png
         description: Documents
         siteMonitor: https://paperless.{{ vault_domain }}
+        widget:
+          type: paperlessngx
+          url: http://{{ lxc_services.automation_stack.ip }}:8000
+          key: {{ vault_homepage_paperless_token | to_json }}
     - Home Assistant:
         href: https://ha.{{ vault_domain }}
         icon: home-assistant.png
