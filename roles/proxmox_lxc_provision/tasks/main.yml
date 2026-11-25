@@ -116,6 +116,22 @@
     label: "{{ item.key }}"
   tags: *lxc_tags
 
+- name: Set CT DNS servers (Pi-hole first with a public fallback)
+  ansible.builtin.shell: |
+    want="{{ lxc_pihole_dns if item.key == 'pihole' else lxc_dns }}"
+    cur=$(pct config {{ item.value.ctid }} | sed -n 's/^nameserver: //p')
+    if [ "$cur" != "$want" ]; then pct set {{ item.value.ctid }} --nameserver "$want"; echo CHANGED; fi
+  args:
+    executable: /bin/bash
+  delegate_to: "{{ item.value.node }}"
+  become: true
+  register: lxc_dns_result
+  changed_when: "'CHANGED' in lxc_dns_result.stdout"
+  loop: "{{ lxc_services | dict2items }}"
+  loop_control:
+    label: "{{ item.key }}"
+  tags: *lxc_tags
+
 - name: Wait for SSH on the new containers
   ansible.builtin.wait_for:
     host: "{{ item.item.value.ip }}"
