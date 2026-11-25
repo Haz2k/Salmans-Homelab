@@ -5,11 +5,21 @@
         icon: immich.png
         description: Photos
         siteMonitor: https://photos.{{ vault_domain }}
+        widget:
+          type: immich
+          url: http://{{ lxc_services.photos_stack.ip }}:2283
+          key: {{ vault_homepage_immich_key | to_json }}
+          version: 2
     - Nextcloud:
         href: https://cloud.{{ vault_domain }}
         icon: nextcloud.png
         description: Files
         siteMonitor: https://cloud.{{ vault_domain }}/status.php
+        widget:
+          type: nextcloud
+          url: https://cloud.{{ vault_domain }}
+          username: {{ vault_nextcloud_admin_user | to_json }}
+          password: {{ vault_nextcloud_admin_password | to_json }}
     - Paperless-ngx:
         href: https://paperless.{{ vault_domain }}
         icon: paperless-ngx.png
@@ -20,6 +30,10 @@
         icon: home-assistant.png
         description: Smart home
         siteMonitor: https://ha.{{ vault_domain }}
+        widget:
+          type: homeassistant
+          url: http://{{ lxc_services.automation_stack.ip }}:8123
+          key: {{ vault_homepage_ha_token | to_json }}
     - Frigate:
         href: https://frigate.{{ vault_domain }}
         icon: frigate.png
@@ -80,11 +94,18 @@
         icon: uptime-kuma.png
         description: Uptime checks
         siteMonitor: https://uptime.{{ vault_domain }}
+        widget:
+          type: uptimekuma
+          url: http://uptime_kuma:3001
+          slug: homepage
     - Scrutiny:
         href: https://scrutiny.{{ vault_domain }}
         icon: scrutiny.png
         description: Disk health
         siteMonitor: https://scrutiny.{{ vault_domain }}
+        widget:
+          type: scrutiny
+          url: http://scrutiny:8080
     - Speedtest Tracker:
         href: https://speedtest.{{ vault_domain }}
         icon: speedtest-tracker.png
@@ -102,8 +123,8 @@
         widget:
           type: proxmox
           url: https://192.168.0.100:8006
-          username: {{ (vault_proxmox_api_user ~ '!' ~ vault_proxmox_api_token_id) | to_json }}
-          password: {{ vault_proxmox_api_token_secret | to_json }}
+          username: {{ (vault_homepage_pve_user ~ '!' ~ vault_homepage_pve_token_id) | to_json }}
+          password: {{ vault_homepage_pve_token_secret | to_json }}
           node: pve1
     - Proxmox (pve2):
         href: https://192.168.0.150:8006
@@ -113,8 +134,8 @@
         widget:
           type: proxmox
           url: https://192.168.0.150:8006
-          username: {{ (vault_proxmox_api_user ~ '!' ~ vault_proxmox_api_token_id) | to_json }}
-          password: {{ vault_proxmox_api_token_secret | to_json }}
+          username: {{ (vault_homepage_pve_user ~ '!' ~ vault_homepage_pve_token_id) | to_json }}
+          password: {{ vault_homepage_pve_token_secret | to_json }}
           node: pve2
     - Pi-hole:
         href: http://{{ lxc_services.pihole.ip }}:8081/admin
