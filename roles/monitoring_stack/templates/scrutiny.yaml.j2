@@ -1,0 +1,4 @@
+version: 1
+notify:
+  urls:
+    - "smtp://{{ vault_smtp_from | urlencode | replace('/', '%2F') }}:{{ vault_scrutiny_smtp_password | urlencode | replace('/', '%2F') }}@{{ vault_smtp_host }}:{{ vault_smtp_port }}/?fromAddress={{ vault_smtp_from | urlencode | replace('/', '%2F') }}&toAddresses={{ vault_zfs_alert_email | urlencode | replace('/', '%2F') }}"

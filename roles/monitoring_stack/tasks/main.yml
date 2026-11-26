@@ -121,6 +121,18 @@
     dest: /opt/monitoring_stack/homepage/widgets.yaml
     mode: "0644"
 
+- name: Template Scrutiny config (email alerts, contains the SMTP password)
+  ansible.builtin.template:
+    src: scrutiny.yaml.j2
+    dest: /opt/monitoring_stack/scrutiny/config/scrutiny.yaml
+    mode: "0600"
+    backup: true
+  register: scrutiny_cfg
+
+- name: Restart Scrutiny so it reads the new config
+  ansible.builtin.command: docker restart scrutiny
+  when: scrutiny_cfg is changed
+
 - name: Start monitoring_stack
   community.docker.docker_compose_v2:
     project_src: /opt/monitoring_stack
