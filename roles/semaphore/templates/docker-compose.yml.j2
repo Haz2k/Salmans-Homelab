@@ -53,8 +53,8 @@ services:
       DIUN_PROVIDERS_DOCKER: "true"
       DIUN_NOTIF_MAIL_HOST: "{{ vault_smtp_host }}"
       DIUN_NOTIF_MAIL_PORT: "{{ vault_smtp_port }}"
-      DIUN_NOTIF_MAIL_USERNAME: "{{ vault_smtp_username }}"
-      DIUN_NOTIF_MAIL_PASSWORD: "{{ vault_smtp_password }}"
+      DIUN_NOTIF_MAIL_USERNAME: "{{ vault_smtp_from }}"
+      DIUN_NOTIF_MAIL_PASSWORD: "{{ vault_scrutiny_smtp_password }}"
       DIUN_NOTIF_MAIL_FROM: "{{ vault_smtp_from }}"
       DIUN_NOTIF_MAIL_TO: "{{ vault_zfs_alert_email }}"
     restart: unless-stopped
